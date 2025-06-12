@@ -1,0 +1,593 @@
+/* Styles de la page de remboursement */
+.remboursement-container {
+    width: 100%;
+}
+
+/* En-tête avec bouton d'ajout */
+.btn-add {
+    padding: 10px 16px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+/* Conteneur du formulaire avec layout */
+.form-container {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.form-card {
+    flex: 1;
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+}
+
+.form-header {
+    margin-bottom: 24px;
+}
+
+.form-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.form-header p {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+/* Message de succès */
+.success-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+
+.success-message i {
+    font-size: 20px;
+}
+
+/* Styles de formulaire */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+    font-size: 14px;
+}
+
+.form-group select,
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: white;
+    color: var(--text-dark);
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group select:focus,
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    outline: none;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-light);
+    opacity: 0.6;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* Style personnalisé pour input file */
+.file-input-container {
+    position: relative;
+}
+
+.file-input-container input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.file-input-custom {
+    display: flex;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 12px 16px;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.file-name {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.file-select-btn {
+    padding: 8px 16px;
+    background-color: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-select-btn:hover {
+    background-color: rgba(99, 102, 241, 0.2);
+}
+
+.file-format-info {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.file-format-info i {
+    color: var(--primary);
+}
+
+/* Boutons d'action du formulaire */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 30px;
+}
+
+.btn-cancel {
+    padding: 12px 24px;
+    background-color: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-dark);
+}
+
+.btn-submit {
+    padding: 12px 24px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+/* Sidebar avec infos */
+.form-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-card {
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.info-card-header {
+    padding: 16px 20px;
+    background-color: rgba(99, 102, 241, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.info-card-header i {
+    color: var(--primary);
+    font-size: 18px;
+}
+
+.info-card-header h3 {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.info-card-content {
+    padding: 20px;
+}
+
+.info-card-content p {
+    color: var(--text-light);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.info-card-content p:last-child {
+    margin-bottom: 0;
+}
+
+.tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tips-list li {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 12px;
+    color: var(--text-light);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.tips-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--success);
+    font-weight: bold;
+}
+
+.tips-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Contenu de la page de remboursement (vue principale) */
+.remboursement-content {
+    margin-top: 20px;
+}
+
+/* Carte de statistiques */
+.overview-card {
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    margin-bottom: 30px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.stat-item {
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
+}
+
+.stat-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light);
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.stat-title i {
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.stat-footer {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+/* Liste des demandes récentes */
+.recent-requests {
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.view-all-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary);
+    font-weight: 500;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.view-all-link:hover {
+    text-decoration: underline;
+}
+
+/* Tableau des demandes */
+.requests-table-container {
+    overflow-x: auto;
+}
+
+.requests-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.requests-table th {
+    text-align: left;
+    padding: 16px 24px;
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.requests-table td {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-dark);
+    font-size: 14px;
+}
+
+.requests-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.requests-table tbody tr:hover {
+    background-color: rgba(99, 102, 241, 0.04);
+}
+
+.request-id {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.description-cell {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.amount {
+    font-weight: 600;
+}
+
+/* Badges de statut */
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge.success {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.status-badge.danger {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+}
+
+.status-badge.pending {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+}
+
+.status-badge.processing {
+    background-color: rgba(99, 102, 241, 0.15);
+    color: var(--primary);
+}
+
+/* Boutons d'action du tableau */
+.actions-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-light);
+    background-color: transparent;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.action-btn.view:hover {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+}
+
+.action-btn.edit:hover {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.action-btn.delete:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+/* Responsivité */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .form-container {
+        flex-direction: column;
+    }
+    
+    .form-sidebar {
+        width: 100%;
+    }
+    
+    .description-cell {
+        max-width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 24px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .page-header .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .requests-table th:nth-child(3),
+    .requests-table td:nth-child(3),
+    .requests-table th:nth-child(4),
+    .requests-table td:nth-child(4) {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .btn-cancel, .btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .requests-table th:nth-child(2),
+    .requests-table td:nth-child(2) {
+        display: none;
+    }
+} 
