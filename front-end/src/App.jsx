@@ -10,6 +10,18 @@ import ParametresPage from './components/Parametres/ParametresPage';
 import MainLayout from './components/Layout/MainLayout';
 import './App.css';
 
+// Fonction pour vérifier si l'utilisateur est authentifié
+const isAuthenticated = () => {
+  return localStorage.getItem('token') !== null;
+};
+
+// Composant pour protéger les routes
+const ProtectedRoute = ({ children }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" />;
+  }
+  return children;
+};
 
 function App() {
   return (
@@ -23,46 +35,56 @@ function App() {
         <Route 
           path="/dashboard" 
           element={
-            <MainLayout>
-              <DashboardPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <DashboardPage />
+              </MainLayout>
+            </ProtectedRoute>
           } 
         />
         <Route 
           path="/remboursement" 
           element={
-            <MainLayout>
-              <RemboursementPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <RemboursementPage />
+              </MainLayout>
+            </ProtectedRoute>
           } 
         />
         <Route 
           path="/demandes" 
           element={
-            <MainLayout>
-              <DemandesPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <DemandesPage />
+              </MainLayout>
+            </ProtectedRoute>
           } 
         />
         <Route 
           path="/profil" 
           element={
-            <MainLayout>
-              <ProfilePage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <ProfilePage />
+              </MainLayout>
+            </ProtectedRoute>
           } 
         />
         <Route 
           path="/parametres" 
           element={
-            <MainLayout>
-              <ParametresPage />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <ParametresPage />
+              </MainLayout>
+            </ProtectedRoute>
           } 
         />
         
         {/* Redirection par défaut */}
-       {/* <Route path="/" element={<Navigate to="/dashboard" />} /> */}
+        <Route path="/" element={<Navigate to="/dashboard" />} />
         
         {/* Route 404 - Page non trouvée */}
         <Route path="*" element={
