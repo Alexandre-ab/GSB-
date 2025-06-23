@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import SignIn from './components/Auth/SignIn';
 import LoginPage from './components/Auth/LoginPage';
+import AuthCallback from './components/Auth/AuthCallback';
 import DemandesPage from './components/Demandes/DemandesPage';
 import DashboardPage from './components/Dashboard/DashboardPage';
 import ProfilePage from './components/Profile/ProfilePage';
@@ -30,6 +31,7 @@ function App() {
         {/* Routes d'authentification (sans layout) */}
         <Route path="/signup" element={<SignIn />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         
         {/* Routes principales de l'application (avec MainLayout) */}
         <Route 

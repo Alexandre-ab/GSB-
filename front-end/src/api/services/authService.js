@@ -1,5 +1,4 @@
 import api from '../config';
-
 /**
  * Service pour gérer l'authentification
  */
