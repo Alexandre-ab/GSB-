@@ -22,7 +22,7 @@ const createUser = async (req, res) => {
         const user = new User({ name, email, password, role })
         await user.save()
         
-        // Ne pas renvoyer le mot de passe dans la réponse
+        // Ne pas renvoyer le mot de passe dans la response
         const userResponse = user.toObject();
         delete userResponse.password;
         
