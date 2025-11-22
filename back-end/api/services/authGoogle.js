@@ -4,9 +4,9 @@ const { User, findOrCreateUser } = require('../../models/user_model');
 
 // Configuration de la stratégie Google
 passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback"
+    clientID: "QWFvOstFhgUt6nw7SsdYTIn1ArYf6UCs",
+    clientSecret:"-nOL6ili7Ij4umBnp6NxLxabx5Z3p9vUKNwMk31iTwVIRPMaIQ5iS3AWKUhJnga5",
+    callbackURL:"/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         console.log('Profil Google reçu:', profile);

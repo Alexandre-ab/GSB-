@@ -55,6 +55,11 @@ const userSchema = new mongoose.Schema({
 })
 
 userSchema.pre('save', async function(next) {
+
+    try {
+        if(!process.env.SALT) {
+            throw new Error('SALT is not defined', { cause: 501 })
+        }
     // Vérifier l'existence seulement pour les nouveaux utilisateurs
     if (this.isNew) {
         const existingUser = await User.findOne({ email: this.email })
@@ -68,6 +73,9 @@ userSchema.pre('save', async function(next) {
         this.password = sha256(this.password + process.env.SALT)
     }
     next()
+    } catch (error) {
+        next(error)
+    }
 })
 
 const User = mongoose.model('User', userSchema)

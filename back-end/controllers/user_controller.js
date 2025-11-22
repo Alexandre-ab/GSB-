@@ -47,7 +47,8 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message: error.message });
         }
         
-        res.status(500).json({ message: "Server error", details: error.message })
+        res.status(500).json({ message: "Server error",
+             details: process.env.NODE_ENV === 'developement' ? error.message : undefined, error : process.env.NODE_ENV === 'developement' ? error.stack : undefined })
     }
 }
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import api from '../../api/config';
 import logo from '../../assets/logo.png';
 import './LoginPage.css';
 
@@ -7,7 +8,7 @@ const SignIn = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('user'); // Rôle par défaut
+    const [role] = useState('user'); // Rôle par défaut
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -32,31 +33,20 @@ const SignIn = () => {
 
         try {
             // Appel API pour créer l'utilisateur
-            const response = await fetch('http://localhost:5000/api/users', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name,
-                    email,
-                    password,
-                    role
-                }),
+            const response = await api.post('/api/users', {
+                name,
+                email,
+                password,
+                role
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log('Inscription réussie:', data);
-                alert('Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
-                navigate('/login');
-            } else {
-                setError(data.message || 'Erreur lors de la création du compte');
-            }
+            console.log('Inscription réussie:', response);
+            alert('Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
+            navigate('/login');
         } catch (error) {
             console.error('Erreur lors de l\'inscription:', error);
-            setError('Erreur de connexion au serveur');
+            // L'erreur contient déjà le message du serveur
+            setError(error.message || 'Erreur lors de la création du compte');
         } finally {
             setIsLoading(false);
         }

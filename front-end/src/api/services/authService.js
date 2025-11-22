@@ -10,7 +10,7 @@ export const authService = {
      */
     login: async (credentials) => {
         try {
-            const response = await api.post('/auth/login', credentials);
+            const response = await api.post('/api/auth/login', credentials);
             if (response.token) {
                 localStorage.setItem('authToken', response.token);
                 localStorage.setItem('user', JSON.stringify(response.user));
