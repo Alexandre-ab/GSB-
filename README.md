@@ -29,8 +29,26 @@ npm run install:all
 PORT=5000
 MONGO_URI=mongodb+srv://admin:admin123@gsb.ycvdfkc.mongodb.net/gsb_db?retryWrites=true&w=majority
 JWT_SECRET=votre_secret_jwt
+SALT=votre_salt_secret
 NODE_ENV=development
 ```
+
+2. **Configuration MongoDB Atlas (pour déploiement sur Render)**
+   
+   Si vous déployez sur Render ou un autre service cloud, vous devez autoriser les connexions depuis ces services :
+   
+   - Allez sur [MongoDB Atlas](https://cloud.mongodb.com/)
+   - Sélectionnez votre cluster
+   - Cliquez sur **"Network Access"** dans le menu de gauche
+   - Cliquez sur **"Add IP Address"**
+   - Pour autoriser toutes les IPs (recommandé pour le développement) :
+     - Cliquez sur **"Allow Access from Anywhere"**
+     - Ou ajoutez manuellement : `0.0.0.0/0`
+   - Pour plus de sécurité en production, ajoutez uniquement l'IP spécifique de Render
+   - Cliquez sur **"Confirm"**
+   - ⚠️ **Important** : Attendez 2-3 minutes que les changements prennent effet
+   
+   **Note** : Sans cette configuration, vous obtiendrez l'erreur "Could not connect to any servers in your MongoDB Atlas cluster"
 
 ### Démarrage en développement
 ```bash
@@ -125,7 +143,13 @@ Naviguez vers le composant `TestAPI` pour vérifier :
 1. **Port déjà utilisé** : Vérifiez que les ports 5000 et 5176 sont libres
 2. **CORS Error** : Le backend a CORS activé pour localhost
 3. **Token expiré** : Supprimez le token du localStorage et rechargez
-4. **MongoDB non connecté** : Vérifiez la chaîne de connexion dans .env
+4. **MongoDB non connecté** : 
+   - Vérifiez la chaîne de connexion dans .env
+   - Vérifiez que votre IP est autorisée dans MongoDB Atlas (voir section Configuration)
+   - Pour Render : Ajoutez `0.0.0.0/0` dans Network Access de MongoDB Atlas
+5. **"vite: not found" sur Render** : Les dépendances frontend ne sont pas installées
+   - Le script `build` installe automatiquement toutes les dépendances
+   - Vérifiez que le script `build` est bien exécuté avant `start` sur Render
 
 ### Logs utiles
 ```bash
@@ -143,8 +167,26 @@ cd back-end && npm run dev
 npm run dev              # Dev backend + frontend
 npm run dev:backend      # Dev backend uniquement  
 npm run dev:frontend     # Dev frontend uniquement
+npm run build            # Build pour production (installe toutes les dépendances + build frontend)
+npm run start            # Démarre backend + frontend en production
 npm run install:all      # Installer toutes les dépendances
 ```
+
+### Déploiement sur Render
+1. **Variables d'environnement à configurer** :
+   - `MONGO_URI` : Votre URI MongoDB Atlas complète
+   - `JWT_SECRET` : Une clé secrète pour signer les tokens JWT
+   - `SALT` : Une chaîne aléatoire pour le hachage des mots de passe
+   - `NODE_ENV` : `production`
+   - `PORT` : Généralement défini automatiquement par Render
+
+2. **Configuration Render** :
+   - Build Command : `npm run build`
+   - Start Command : `npm start`
+   - Root Directory : Laisser vide (racine du projet)
+
+3. **MongoDB Atlas** :
+   - N'oubliez pas d'ajouter `0.0.0.0/0` dans Network Access (voir section Configuration)
 
 ### Modifications en cours
 - Le token est actuellement hardcodé pour les tests

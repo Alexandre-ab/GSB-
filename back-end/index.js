@@ -41,11 +41,13 @@ const connectDB = async () => {
         const mongoURI = process.env.MONGO_URI || 'mongodb+srv://admin:admin123@gsb.ycvdfkc.mongodb.net/gsb_db?retryWrites=true&w=majority'
         
         const options = {
-            serverSelectionTimeoutMS: 5000, // Timeout après 5 secondes
+            serverSelectionTimeoutMS: 10000, // Timeout après 10 secondes
             socketTimeoutMS: 45000, // Timeout socket
             connectTimeoutMS: 10000, // Timeout de connexion
             maxPoolSize: 10, // Nombre max de connexions
             minPoolSize: 5, // Nombre min de connexions
+            retryWrites: true,
+            w: 'majority'
         }
         
         await mongoose.connect(mongoURI, options)
@@ -66,8 +68,38 @@ const connectDB = async () => {
         
         return true
     } catch (error) {
-        console.error('❌ Erreur de connexion à MongoDB:', error.message)
-        console.error('URI utilisée:', process.env.MONGO_URI ? 'MONGO_URI depuis .env' : 'URI par défaut')
+        console.error('\n❌ ============================================')
+        console.error('❌ ERREUR DE CONNEXION À MONGODB')
+        console.error('❌ ============================================')
+        console.error('Message:', error.message)
+        console.error('\n📋 CAUSES POSSIBLES:')
+        
+        if (error.message.includes('whitelist') || error.message.includes('IP')) {
+            console.error('   → Votre IP n\'est pas autorisée dans MongoDB Atlas')
+            console.error('\n🔧 SOLUTION:')
+            console.error('   1. Allez sur https://cloud.mongodb.com/')
+            console.error('   2. Sélectionnez votre cluster')
+            console.error('   3. Cliquez sur "Network Access" dans le menu de gauche')
+            console.error('   4. Cliquez sur "Add IP Address"')
+            console.error('   5. Ajoutez "0.0.0.0/0" pour autoriser toutes les IPs')
+            console.error('      (ou l\'IP spécifique de Render si vous la connaissez)')
+            console.error('   6. Attendez quelques minutes que les changements prennent effet')
+        } else if (error.message.includes('authentication')) {
+            console.error('   → Problème d\'authentification (identifiants incorrects)')
+            console.error('\n🔧 SOLUTION:')
+            console.error('   Vérifiez votre MONGO_URI dans les variables d\'environnement')
+        } else if (error.message.includes('timeout')) {
+            console.error('   → Timeout de connexion')
+            console.error('\n🔧 SOLUTION:')
+            console.error('   - Vérifiez votre connexion internet')
+            console.error('   - Vérifiez que MongoDB Atlas est accessible')
+            console.error('   - Vérifiez la whitelist IP (voir instructions ci-dessus)')
+        } else {
+            console.error('   → Erreur inconnue')
+        }
+        
+        console.error('\n📝 URI utilisée:', process.env.MONGO_URI ? 'MONGO_URI depuis .env' : 'URI par défaut')
+        console.error('❌ ============================================\n')
         process.exit(1) // Arrêter le serveur si MongoDB ne peut pas se connecter
     }
 }
