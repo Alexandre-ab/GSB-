@@ -35,14 +35,42 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-// Connexion à MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://admin:admin123@gsb.ycvdfkc.mongodb.net/gsb_db?retryWrites=true&w=majority')
-    .then(() => {
-        console.log('Connecté à MongoDB')
-    })
-    .catch(err => {
-        console.error('Erreur de connexion à MongoDB:', err)
-    })
+// Connexion à MongoDB avec options améliorées
+const connectDB = async () => {
+    try {
+        const mongoURI = process.env.MONGO_URI || 'mongodb+srv://admin:admin123@gsb.ycvdfkc.mongodb.net/gsb_db?retryWrites=true&w=majority'
+        
+        const options = {
+            serverSelectionTimeoutMS: 5000, // Timeout après 5 secondes
+            socketTimeoutMS: 45000, // Timeout socket
+            connectTimeoutMS: 10000, // Timeout de connexion
+            maxPoolSize: 10, // Nombre max de connexions
+            minPoolSize: 5, // Nombre min de connexions
+        }
+        
+        await mongoose.connect(mongoURI, options)
+        console.log('✅ Connecté à MongoDB avec succès')
+        
+        // Gestion des événements de connexion
+        mongoose.connection.on('error', (err) => {
+            console.error('❌ Erreur MongoDB:', err)
+        })
+        
+        mongoose.connection.on('disconnected', () => {
+            console.warn('⚠️ MongoDB déconnecté')
+        })
+        
+        mongoose.connection.on('reconnected', () => {
+            console.log('✅ MongoDB reconnecté')
+        })
+        
+        return true
+    } catch (error) {
+        console.error('❌ Erreur de connexion à MongoDB:', error.message)
+        console.error('URI utilisée:', process.env.MONGO_URI ? 'MONGO_URI depuis .env' : 'URI par défaut')
+        process.exit(1) // Arrêter le serveur si MongoDB ne peut pas se connecter
+    }
+}
 
 // Routes d'authentification Google
 app.get("/auth/google", passport.authenticate("google", {
@@ -106,7 +134,22 @@ app.use((err, req, res, next) => {
     })
 })
 
-// Démarrage du serveur
-app.listen(port, () => {
-    console.log(`Serveur en cours d'exécution sur le port ${port}`)
-})
+// Démarrage du serveur - ATTENDRE que MongoDB soit connecté
+const startServer = async () => {
+    try {
+        // Attendre la connexion MongoDB
+        await connectDB()
+        
+        // Démarrer le serveur seulement après la connexion MongoDB
+        app.listen(port, () => {
+            console.log(`🚀 Serveur en cours d'exécution sur le port ${port}`)
+            console.log(`📡 API disponible sur http://localhost:${port}/api`)
+        })
+    } catch (error) {
+        console.error('❌ Impossible de démarrer le serveur:', error)
+        process.exit(1)
+    }
+}
+
+// Démarrer l'application
+startServer()

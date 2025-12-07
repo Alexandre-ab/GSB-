@@ -6,7 +6,23 @@ const sha256 = require('js-sha256')
 const login = async (req, res) => {
     try {
         const { email, password } = req.body
-      
+        
+        // Vérifier que les variables d'environnement sont définies
+        if (!process.env.SALT || !process.env.JWT_SECRET) {
+            console.error('Variables d\'environnement manquantes:', {
+                SALT: !!process.env.SALT,
+                JWT_SECRET: !!process.env.JWT_SECRET
+            })
+            return res.status(500).json({ 
+                message: 'Configuration serveur incomplète',
+                error: 'Variables d\'environnement manquantes'
+            })
+        }
+        
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email et mot de passe requis' })
+        }
+        
         const user = await User.findOne({ email })
         if (!user) 
            return res.status(401).json({ message: 'Invalid email or password' })
@@ -24,7 +40,10 @@ const login = async (req, res) => {
         res.status(200).json({ token })
     } catch (error) {
         console.error('Erreur lors du login:', error)
-        res.status(500).json({ message: 'Erreur serveur' })
+        res.status(500).json({ 
+            message: 'Erreur serveur',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        })
     }
 }
 
