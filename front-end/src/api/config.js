@@ -1,5 +1,5 @@
 // Configuration API avec Fetch natif
-const API_URL = 'https://gsb-2.onrender.com';
+const API_URL = 'http://gsb-2.onrender.com';
 
 // Fonction utilitaire pour gérer les requêtes
 async function apiFetch(endpoint, options = {}) {

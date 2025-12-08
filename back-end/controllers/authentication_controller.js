@@ -113,5 +113,29 @@ const isAdmin = (req, res, next) => {
     }
 }
 
+/**
+ * Récupérer les informations de l'utilisateur connecté
+ * Route: GET /api/users/me
+ * 
+ * Logique :
+ * - Utilise le token décodé dans req.user (ajouté par verifyToken)
+ * - Recherche l'utilisateur complet dans la base de données
+ * - Retourne les informations sans le mot de passe
+ */
+const getCurrentUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password')
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+        res.status(200).json(user)
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        })
+    }
+}
+
 // Export des fonctions d'authentification et des middlewares
-module.exports = { login, verifyToken, isAdmin }
+module.exports = { login, verifyToken, isAdmin, getCurrentUser }

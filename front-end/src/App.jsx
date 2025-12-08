@@ -8,6 +8,7 @@ import DashboardPage from './components/Dashboard/DashboardPage';
 import ProfilePage from './components/Profile/ProfilePage';
 import RemboursementPage from './components/Remboursement/RemboursementPage';
 import ParametresPage from './components/Parametres/ParametresPage';
+import AdminPage from './components/Admin/AdminPage';
 import MainLayout from './components/Layout/MainLayout';
 import './App.css';
 
@@ -80,6 +81,16 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <ParametresPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AdminPage />
               </MainLayout>
             </ProtectedRoute>
           } 

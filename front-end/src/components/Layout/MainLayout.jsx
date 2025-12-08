@@ -1,18 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './MainLayout.css';
+import { userService } from '../../api/services/userService';
 
 const MainLayout = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname;
+    const [user, setUser] = useState(null);
+
+    // Charger les informations de l'utilisateur
+    useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const userData = await userService.getCurrentUser();
+                console.log('👤 Données utilisateur récupérées:', userData);
+                console.log('🔐 Rôle de l\'utilisateur:', userData?.role);
+                setUser(userData);
+            } catch (error) {
+                console.error('Erreur lors du chargement du profil:', error);
+            }
+        };
+        loadUser();
+    }, []);
 
     // Fonction pour gérer la déconnexion
     const handleLogout = () => {
-        // Ici, vous pourriez ajouter du code pour supprimer les tokens d'authentification
-        // Par exemple: localStorage.removeItem('authToken');
-        
-        // Redirection vers la page de connexion
+        localStorage.removeItem('token');
         navigate('/login');
     };
 
@@ -26,7 +40,9 @@ const MainLayout = ({ children }) => {
                     </div>
                     <div className="profile">
                         <img src="https://randomuser.me/api/portraits/men/40.jpg" alt="Profile" className="profile-img" />
-                        <span className="profile-name">Alexandre Boué</span>
+                        <span className="profile-name">
+                            {user ? user.name : 'Chargement...'}
+                        </span>
                     </div>
                 </div>
             </header>
@@ -67,6 +83,14 @@ const MainLayout = ({ children }) => {
                                     <span>Paramètres</span>
                                 </Link>
                             </li>
+                            {user && user.role === 'admin' && (
+                                <li className={currentPath === '/admin' ? 'active' : ''}>
+                                    <Link to="/admin" className={`nav-link ${currentPath === '/admin' ? 'active' : ''}`}>
+                                        <i className="fa-solid fa-shield-halved"></i>
+                                        <span>Admin</span>
+                                    </Link>
+                                </li>
+                            )}
                             <li className="logout-item">
                                 <button onClick={handleLogout} className="nav-link logout-btn">
                                     <i className="fa-solid fa-right-from-bracket"></i>
