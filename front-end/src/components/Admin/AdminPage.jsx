@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './AdminPage.css';
 import { billsAPI } from '../../api/services/billService';
+import { userService } from '../../api/services/userService';
+import UserModal from './UserModal';
 import api from '../../api/config';
 
 const AdminPage = () => {
@@ -16,6 +18,11 @@ const AdminPage = () => {
         montantTotal: 0
     });
     const [isLoading, setIsLoading] = useState(true);
+    
+    // États pour la modale utilisateur
+    const [showUserModal, setShowUserModal] = useState(false);
+    const [modalMode, setModalMode] = useState('add'); // 'add' ou 'edit'
+    const [selectedUser, setSelectedUser] = useState(null);
 
     // Charger les données
     useEffect(() => {
@@ -63,7 +70,9 @@ const AdminPage = () => {
 
     // Refuser une demande
     const handleReject = async (billId) => {
-        const reason = prompt('Raison du refus (optionnel):');
+        if (!window.confirm('Êtes-vous sûr de vouloir refuser cette demande ?')) {
+            return;
+        }
         try {
             await api.put(`/api/bills/${billId}`, { status: 'Rejected' });
             alert('Demande refusée');
@@ -71,6 +80,57 @@ const AdminPage = () => {
         } catch (error) {
             console.error('Erreur lors du refus:', error);
             alert('Erreur lors du refus de la demande');
+        }
+    };
+
+    // Gestion des utilisateurs
+    const handleAddUser = () => {
+        setModalMode('add');
+        setSelectedUser(null);
+        setShowUserModal(true);
+    };
+
+    const handleEditUser = (user) => {
+        setModalMode('edit');
+        setSelectedUser(user);
+        setShowUserModal(true);
+    };
+
+    const handleDeleteUser = async (userId, userName) => {
+        if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${userName}" ?\n\nCette action est irréversible.`)) {
+            return;
+        }
+
+        try {
+            await userService.deleteUser(userId);
+            alert('Utilisateur supprimé avec succès');
+            // Recharger la liste des utilisateurs
+            const usersData = await userService.getAllUsers();
+            setUsers(usersData);
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            alert('Erreur lors de la suppression de l\'utilisateur');
+        }
+    };
+
+    const handleUserSubmit = async (formData) => {
+        try {
+            if (modalMode === 'add') {
+                await userService.createUser(formData);
+                alert('Utilisateur créé avec succès');
+            } else {
+                await userService.updateUser(selectedUser._id, {
+                    name: formData.name,
+                    role: formData.role
+                });
+                alert('Utilisateur modifié avec succès');
+            }
+            // Recharger la liste des utilisateurs
+            const usersData = await userService.getAllUsers();
+            setUsers(usersData);
+        } catch (error) {
+            console.error('Erreur lors de la soumission:', error);
+            throw error;
         }
     };
 
@@ -92,6 +152,19 @@ const AdminPage = () => {
             default: return 'En attente';
         }
     };
+
+    // Charger les utilisateurs
+    useEffect(() => {
+        const loadUsers = async () => {
+            try {
+                const usersData = await userService.getAllUsers();
+                setUsers(usersData);
+            } catch (error) {
+                console.error('Erreur lors du chargement des utilisateurs:', error);
+            }
+        };
+        loadUsers();
+    }, []);
 
     if (isLoading) {
         return (
@@ -254,15 +327,69 @@ const AdminPage = () => {
                 {activeTab === 'users' && (
                     <div className="users-section">
                         <div className="section-header">
-                            <h2>Gestion des utilisateurs</h2>
+                            <h2>Gestion des utilisateurs ({users.length})</h2>
+                            <button className="btn-add" onClick={handleAddUser}>
+                                <i className="fa-solid fa-user-plus"></i>
+                                Ajouter un utilisateur
+                            </button>
                         </div>
-                        <div className="coming-soon">
-                            <i className="fa-solid fa-wrench"></i>
-                            <p>Fonctionnalité en cours de développement</p>
+                        <div className="table-container">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Nom</th>
+                                        <th>Rôle</th>
+                                        <th>Date de création</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users.map((user) => (
+                                        <tr key={user._id}>
+                                            <td className="email-cell">{user.email}</td>
+                                            <td className="name-cell">{user.name}</td>
+                                            <td className="role-cell">
+                                                <span className={`status-badge ${user.role === 'admin' ? 'badge-approved' : 'badge-pending'}`}>
+                                                    {user.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
+                                                </span>
+                                            </td>
+                                            <td className="date-cell">
+                                                {user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '-'}
+                                            </td>
+                                            <td className="actions-cell">
+                                                <button 
+                                                    className="action-btn edit-btn"
+                                                    onClick={() => handleEditUser(user)}
+                                                    title="Modifier"
+                                                >
+                                                    <i className="fa-solid fa-edit"></i>
+                                                </button>
+                                                <button 
+                                                    className="action-btn delete-btn"
+                                                    onClick={() => handleDeleteUser(user._id, user.name)}
+                                                    title="Supprimer"
+                                                >
+                                                    <i className="fa-solid fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 )}
             </div>
+
+            {/* Modale utilisateur */}
+            <UserModal
+                isOpen={showUserModal}
+                mode={modalMode}
+                user={selectedUser}
+                onClose={() => setShowUserModal(false)}
+                onSubmit={handleUserSubmit}
+            />
         </div>
     );
 };

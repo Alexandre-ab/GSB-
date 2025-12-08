@@ -1,0 +1,217 @@
+/* ============================================
+   USER MODAL - CORPORATE FINANCE STYLE
+   ============================================ */
+
+.user-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.user-modal-content {
+    background: var(--bg-card);
+    border-radius: 4px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+}
+
+/* Header */
+.user-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #fafbfc;
+}
+
+.user-modal-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.user-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    font-size: 16px;
+}
+
+.user-modal-close:hover {
+    background: var(--bg-main);
+    color: var(--text-primary);
+}
+
+/* Form */
+.user-modal-form {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--text-primary);
+    background-color: white;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-group input.error,
+.form-group select.error {
+    border-color: #ef4444;
+}
+
+.form-group input:disabled {
+    background-color: var(--bg-main);
+    color: var(--text-light);
+    cursor: not-allowed;
+}
+
+.error-message {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #ef4444;
+}
+
+.submit-error {
+    padding: 12px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Footer */
+.user-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-cancel,
+.btn-submit {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-cancel {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.btn-cancel:hover:not(:disabled) {
+    background: var(--bg-main);
+    color: var(--text-primary);
+}
+
+.btn-submit {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-cancel:disabled,
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .user-modal-overlay {
+        padding: 10px;
+    }
+
+    .user-modal-content {
+        max-height: 95vh;
+    }
+
+    .user-modal-header {
+        padding: 16px;
+    }
+
+    .user-modal-form {
+        padding: 16px;
+    }
+
+    .user-modal-footer {
+        flex-direction: column-reverse;
+    }
+
+    .btn-cancel,
+    .btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+}
+

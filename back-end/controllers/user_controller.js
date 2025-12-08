@@ -175,6 +175,71 @@ const deleteUser = async (req, res) => {
     }
 }
 
+/**
+ * Mettre à jour un utilisateur par ID
+ * Route: PUT /api/users/:id
+ * 
+ * Logique :
+ * 1. Identifier l'utilisateur par ID (route param)
+ * 2. Mettre à jour les champs fournis (name, role)
+ * 3. Retourner l'utilisateur mis à jour sans le mot de passe
+ */
+const updateUserById = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { name, role } = req.body
+        
+        // Créer un objet avec uniquement les champs à mettre à jour
+        const updateData = {}
+        if (name) updateData.name = name
+        if (role) updateData.role = role
+        
+        // Mettre à jour l'utilisateur et retourner le document mis à jour
+        const user = await User.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { new: true }
+        ).select('-password')
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+        
+        res.status(200).json(user)
+    } catch (error) {
+        res.status(500).json({ 
+            message: "Server error",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        })
+    }
+}
+
+/**
+ * Supprimer un utilisateur par ID
+ * Route: DELETE /api/users/:id
+ * 
+ * Logique :
+ * - Identifier l'utilisateur par ID
+ * - Supprimer le document de la base de données
+ */
+const deleteUserById = async (req, res) => {
+    try {
+        const { id } = req.params
+        const user = await User.findByIdAndDelete(id)
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+        
+        res.status(200).json({ message: 'User deleted successfully' })
+    } catch (error) {
+        res.status(500).json({ 
+            message: "Server error",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        })
+    }
+}
+
 // Export des fonctions du contrôleur
-module.exports = { createUser, getUsers, getUserByEmail, updateUser, deleteUser }
+module.exports = { createUser, getUsers, getUserByEmail, updateUser, deleteUser, updateUserById, deleteUserById }
 

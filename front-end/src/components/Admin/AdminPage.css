@@ -174,7 +174,8 @@
     margin: 0;
 }
 
-.btn-refresh {
+.btn-refresh,
+.btn-add {
     padding: 8px 16px;
     background: transparent;
     border: 1px solid var(--border-color);
@@ -189,10 +190,23 @@
     transition: all 0.15s ease;
 }
 
-.btn-refresh:hover {
+.btn-refresh:hover,
+.btn-add:hover {
     background: var(--primary);
     color: white;
     border-color: var(--primary);
+}
+
+.btn-add {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-add:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Table */
@@ -236,10 +250,20 @@
 }
 
 /* Cellules spécifiques */
-.id-cell {
+.id-cell,
+.email-cell {
     font-family: monospace;
     font-size: 13px;
     color: var(--text-light);
+}
+
+.name-cell {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.role-cell {
+    text-transform: capitalize;
 }
 
 .date-cell {
@@ -330,6 +354,18 @@
     background: var(--primary);
     color: white;
     border-color: var(--primary);
+}
+
+.edit-btn:hover {
+    background: #0ea5e9;
+    color: white;
+    border-color: #0ea5e9;
+}
+
+.delete-btn:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
 }
 
 /* Coming soon */
