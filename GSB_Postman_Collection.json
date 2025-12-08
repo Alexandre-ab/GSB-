@@ -1,0 +1,436 @@
+{
+  "info": {
+    "name": "GSB API - Collection Complete",
+    "_postman_id": "gsb-api-collection",
+    "description": "Collection complète pour tester l'API GSB\n\nDéveloppé pour le projet GSB - Gestion de Frais Professionnels\n\n**Variables nécessaires:**\n- base_url : http://localhost:5000\n- token : (sera rempli automatiquement après login)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔓 Authentication",
+      "item": [
+        {
+          "name": "1. Créer un utilisateur",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Martin\",\n  \"email\": \"alice.martin@example.com\",\n  \"password\": \"motdepasse123\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Créer un nouvel utilisateur dans la base de données.\n\n**Champs requis:**\n- name : Nom complet\n- email : Email unique\n- password : Mot de passe (sera hashé)\n- role : \"user\" ou \"admin\""
+          },
+          "response": []
+        },
+        {
+          "name": "2. Créer un admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bob Admin\",\n  \"email\": \"bob.admin@example.com\",\n  \"password\": \"admin123\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Créer un utilisateur avec le rôle admin."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Login (User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Sauvegarder automatiquement le token",
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "    console.log(\"✅ Token sauvegardé:\", jsonData.token);",
+                  "} else {",
+                  "    console.log(\"❌ Échec de connexion\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice.martin@example.com\",\n  \"password\": \"motdepasse123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Se connecter et récupérer un JWT.\n\nLe token est automatiquement sauvegardé dans la variable {{token}}."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Sauvegarder automatiquement le token admin",
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "    console.log(\"✅ Token admin sauvegardé:\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"bob.admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Se connecter en tant qu'admin."
+          },
+          "response": []
+        }
+      ],
+      "description": "Routes publiques d'authentification"
+    },
+    {
+      "name": "👤 Users",
+      "item": [
+        {
+          "name": "5. Récupérer tous les utilisateurs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Récupérer la liste de tous les utilisateurs.\n\n**Nécessite:** Token JWT"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Filtrer par email",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users?email=alice.martin@example.com",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "alice.martin@example.com"
+                }
+              ]
+            },
+            "description": "Rechercher un utilisateur par email."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Mettre à jour un utilisateur",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Dupont\",\n  \"newEmail\": \"alice.dupont@example.com\",\n  \"password\": \"nouveauMotDePasse\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users?email=alice.martin@example.com",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "alice.martin@example.com"
+                }
+              ]
+            },
+            "description": "Mettre à jour les informations d'un utilisateur.\n\nIdentifier l'utilisateur par email (query param)."
+          },
+          "response": []
+        },
+        {
+          "name": "8. Supprimer un utilisateur",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users?email=alice.martin@example.com",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "alice.martin@example.com"
+                }
+              ]
+            },
+            "description": "Supprimer un utilisateur de la base de données."
+          },
+          "response": []
+        }
+      ],
+      "description": "Routes protégées pour la gestion des utilisateurs"
+    },
+    {
+      "name": "💰 Bills (Factures)",
+      "item": [
+        {
+          "name": "9. Créer une facture",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "metadata",
+                  "value": "{\"date\":\"2024-01-15\",\"amount\":45.50,\"description\":\"Déjeuner client\",\"status\":\"pending\",\"type\":\"repas\"}",
+                  "type": "text"
+                },
+                {
+                  "key": "proof",
+                  "type": "file",
+                  "src": [],
+                  "description": "Sélectionner une image (jpg, png, gif)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bills",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bills"]
+            },
+            "description": "Créer une nouvelle facture avec upload de justificatif.\n\n**Format:** multipart/form-data\n- metadata : JSON stringifié\n- proof : fichier image"
+          },
+          "response": []
+        },
+        {
+          "name": "10. Récupérer les factures",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bills",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bills"]
+            },
+            "description": "Récupérer les factures.\n\n**Logique:**\n- Admin : voit toutes les factures\n- User : voit uniquement ses factures"
+          },
+          "response": []
+        },
+        {
+          "name": "11. Récupérer une facture par ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bills/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bills", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "65f8b1d8e5f6g7h8i9j0k2",
+                  "description": "ID de la facture"
+                }
+              ]
+            },
+            "description": "Récupérer une facture spécifique par son ID."
+          },
+          "response": []
+        },
+        {
+          "name": "12. Mettre à jour une facture",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"amount\": 50.00,\n  \"description\": \"Déjeuner client - Validé\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bills/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bills", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "65f8b1d8e5f6g7h8i9j0k2"
+                }
+              ]
+            },
+            "description": "Mettre à jour une facture (typiquement pour changer le statut).\n\n**Statuts possibles:**\n- pending\n- approved\n- rejected"
+          },
+          "response": []
+        },
+        {
+          "name": "13. Supprimer une facture",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bills/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bills", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "65f8b1d8e5f6g7h8i9j0k2"
+                }
+              ]
+            },
+            "description": "Supprimer une facture de la base de données."
+          },
+          "response": []
+        }
+      ],
+      "description": "Routes protégées pour la gestion des factures"
+    },
+    {
+      "name": "🧪 Tests",
+      "item": [
+        {
+          "name": "API Test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/test",
+              "host": ["{{base_url}}"],
+              "path": ["api", "test"]
+            },
+            "description": "Test simple pour vérifier que l'API est fonctionnelle."
+          },
+          "response": []
+        }
+      ],
+      "description": "Routes de test"
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
+

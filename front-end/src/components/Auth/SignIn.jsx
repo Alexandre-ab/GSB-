@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../api/config';
 import logo from '../../assets/logo.png';
+import './SignIn.css';
 import './LoginPage.css';
 
 const SignIn = () => {
