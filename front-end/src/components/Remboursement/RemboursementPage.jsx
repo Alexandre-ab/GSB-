@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './RemboursementPage.css';
+import { billService } from '../../api/services/billService';
 
 const RemboursementPage = () => {
     // État pour le formulaire de remboursement
@@ -16,15 +17,47 @@ const RemboursementPage = () => {
     const [showForm, setShowForm] = useState(false);
     
     // État pour les remboursements récents
-    const [recentRequests, setRecentRequests] = useState([
-        { id: 'DEM-1092', date: '18 juin 2023', type: 'Transport', montant: '78.50', statut: 'En attente', description: 'Trajet Paris-Lyon pour visite client' },
-        { id: 'DEM-1089', date: '15 juin 2023', type: 'Transport', montant: '57.20', statut: 'Approuvé', description: 'Taxi pour rendez-vous professionnel' },
-        { id: 'DEM-1088', date: '12 juin 2023', type: 'Restauration', montant: '94.50', statut: 'Approuvé', description: 'Déjeuner avec clients' },
-        { id: 'DEM-1087', date: '10 juin 2023', type: 'Hébergement', montant: '185.00', statut: 'En attente', description: 'Nuit d\'hôtel à Marseille' }
-    ]);
+    const [recentRequests, setRecentRequests] = useState([]);
+    const [isLoadingRequests, setIsLoadingRequests] = useState(true);
     
     // État pour l'indication de soumission réussie
     const [successSubmit, setSuccessSubmit] = useState(false);
+    
+    // Charger les demandes depuis l'API au montage du composant
+    useEffect(() => {
+        const fetchRecentRequests = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.warn('Utilisateur non connecté');
+                    setIsLoadingRequests(false);
+                    return;
+                }
+
+                const bills = await billService.getAllBills();
+                
+                // Convertir les bills en format attendu par le composant
+                const formatted = bills.map(bill => ({
+                    id: bill._id,
+                    date: new Date(bill.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+                    type: bill.type || 'Autre',
+                    montant: bill.amount ? bill.amount.toString() : '0.00',
+                    statut: bill.status === 'Approved' ? 'Approuvé' : 
+                           bill.status === 'Rejected' ? 'Refusé' : 'En attente',
+                    description: bill.description || 'Aucune description'
+                }));
+                
+                // Trier par date (les plus récents d'abord) et limiter à 4
+                setRecentRequests(formatted.slice(0, 4));
+            } catch (error) {
+                console.error('Erreur lors du chargement des demandes:', error);
+            } finally {
+                setIsLoadingRequests(false);
+            }
+        };
+
+        fetchRecentRequests();
+    }, []);
     
     // Types de dépenses disponibles
     const expenseTypes = [
@@ -75,25 +108,54 @@ const RemboursementPage = () => {
     };
     
     // Fonction pour soumettre le formulaire
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Simuler l'envoi des données au serveur
-        setTimeout(() => {
-            // Générer un ID aléatoire pour la nouvelle demande
-            const newId = `DEM-${1093 + Math.floor(Math.random() * 10)}`;
+        try {
+            // Vérifier le token
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Vous devez être connecté pour créer une demande');
+                return;
+            }
+
+            // Créer le FormData
+            const apiFormData = new FormData();
+            apiFormData.append('proof', formData.justificatif);
+            apiFormData.append('metadata', JSON.stringify({
+                date: formData.date,
+                amount: parseFloat(formData.montant),
+                type: expenseTypes.find(type => type.id === formData.type)?.label || formData.type,
+                description: `${formData.description} - Catégorie: ${formData.categorie}`,
+                status: 'Pending'
+            }));
+
+            // Appeler l'API
+            const response = await fetch('https://gsb-2.onrender.com/api/bills', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: apiFormData,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const createdBill = await response.json();
             
             // Ajouter la nouvelle demande à la liste
             const newRequest = {
-                id: newId,
+                id: createdBill._id,
                 date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
                 type: expenseTypes.find(type => type.id === formData.type)?.label || formData.type,
                 montant: parseFloat(formData.montant).toFixed(2),
-                statut: 'En cours de traitement',
+                statut: 'En attente',
                 description: formData.description
             };
             
-            setRecentRequests([newRequest, ...recentRequests]);
+            setRecentRequests([newRequest, ...recentRequests].slice(0, 4));
             
             // Afficher le message de succès
             setSuccessSubmit(true);
@@ -112,7 +174,10 @@ const RemboursementPage = () => {
             setTimeout(() => {
                 setSuccessSubmit(false);
             }, 5000);
-        }, 1000);
+        } catch (error) {
+            console.error('Erreur lors de la création de la demande:', error);
+            alert('Erreur lors de la création de la demande: ' + error.message);
+        }
     };
     
     // Fonction pour obtenir la classe de statut
@@ -357,6 +422,15 @@ const RemboursementPage = () => {
                         </div>
                         
                         <div className="requests-table-container">
+                            {isLoadingRequests ? (
+                                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                                    <p>Chargement des demandes...</p>
+                                </div>
+                            ) : recentRequests.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                                    <p>Aucune demande récente</p>
+                                </div>
+                            ) : (
                             <table className="requests-table">
                                 <thead>
                                     <tr>
@@ -411,6 +485,7 @@ const RemboursementPage = () => {
                                     ))}
                                 </tbody>
                             </table>
+                            )}
                         </div>
                     </div>
                 </div>

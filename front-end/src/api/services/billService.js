@@ -10,7 +10,7 @@ export const billService = {
      */
     getAllBills: async () => {
         try {
-            return await api.get('/bills');
+            return await api.get('/api/bills');
         } catch (error) {
             console.error('Erreur lors de la récupération des factures:', error);
             throw error;
@@ -24,7 +24,7 @@ export const billService = {
      */
     getBillById: async (id) => {
         try {
-            return await api.get(`/bills/${id}`);
+            return await api.get(`/api/bills/${id}`);
         } catch (error) {
             console.error(`Erreur lors de la récupération de la facture ${id}:`, error);
             throw error;
@@ -38,7 +38,7 @@ export const billService = {
      */
     createBill: async (billData) => {
         try {
-            return await api.post('/bills', billData);
+            return await api.post('/api/bills', billData);
         } catch (error) {
             console.error('Erreur lors de la création de la facture:', error);
             throw error;
@@ -53,7 +53,7 @@ export const billService = {
      */
     updateBill: async (id, billData) => {
         try {
-            return await api.put(`/bills/${id}`, billData);
+            return await api.put(`/api/bills/${id}`, billData);
         } catch (error) {
             console.error(`Erreur lors de la mise à jour de la facture ${id}:`, error);
             throw error;
@@ -67,12 +67,21 @@ export const billService = {
      */
     deleteBill: async (id) => {
         try {
-            return await api.delete(`/bills/${id}`);
+            return await api.delete(`/api/bills/${id}`);
         } catch (error) {
             console.error(`Erreur lors de la suppression de la facture ${id}:`, error);
             throw error;
         }
     }
+};
+
+// Alias pour compatibilité avec l'ancien code
+export const billsAPI = {
+    getAll: billService.getAllBills,
+    getById: billService.getBillById,
+    create: billService.createBill,
+    update: billService.updateBill,
+    delete: billService.deleteBill
 };
 
 export default billService; 

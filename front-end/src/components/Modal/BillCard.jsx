@@ -10,12 +10,19 @@ export default function Dashboard({ onLogout }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MmIwMTRkNjkyMDFhYjkxNzllYTY3YyIsInJvbGUiOiJjbGllbnQiLCJlbWFpbCI6ImNsYXJhNjlAZ21haWwuY29tIiwiaWF0IjoxNzQ3NjQ5NDcxLCJleHAiOjE3NDc3MzU4NzF9.nxV7-ByYZFEw_3ppExcJqRNQ602AnG99bxbx4Tl4zwE';
 
   useEffect(() =>{
   (async () => {
     try{
-      const response = await fetch('http://localhost:3000/bills',
+      // Récupérer le token depuis localStorage au lieu de le hardcoder
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.warn('Aucun token trouvé - utilisateur non connecté');
+        return;
+      }
+
+      const response = await fetch('https://gsb-2.onrender.com/api/bills',
         {
           method: 'GET',
           headers: {
@@ -23,6 +30,11 @@ export default function Dashboard({ onLogout }) {
             'Authorization': `Bearer ${token}`,
           },
         });
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
         const data = await response.json();
         console.log('Fetched bills:', data);
         setBills(data);

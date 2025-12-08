@@ -40,7 +40,7 @@ const DashboardPage = () => {
                 setError(null);
 
                 // Vérifier que l'utilisateur est connecté
-                const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+                const token = localStorage.getItem('token');
                 if (!token) {
                     setError('Vous devez être connecté pour voir ces données');
                     setIsLoading(false);

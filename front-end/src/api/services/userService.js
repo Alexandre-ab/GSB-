@@ -10,7 +10,7 @@ export const userService = {
      */
     getCurrentUser: async () => {
         try {
-            return await api.get('/users/me');
+            return await api.get('/api/users/me');
         } catch (error) {
             console.error('Erreur lors de la récupération de l\'utilisateur:', error);
             throw error;
@@ -24,7 +24,7 @@ export const userService = {
      */
     updateProfile: async (userData) => {
         try {
-            return await api.put('/users/me', userData);
+            return await api.put('/api/users/me', userData);
         } catch (error) {
             console.error('Erreur lors de la mise à jour du profil:', error);
             throw error;
@@ -38,7 +38,7 @@ export const userService = {
      */
     changePassword: async (passwordData) => {
         try {
-            return await api.put('/users/me/password', passwordData);
+            return await api.put('/api/users/me/password', passwordData);
         } catch (error) {
             console.error('Erreur lors du changement de mot de passe:', error);
             throw error;

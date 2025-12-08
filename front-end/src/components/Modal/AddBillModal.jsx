@@ -90,7 +90,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
     
     try {
       // Vérifier si un token d'authentification existe
-      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const token = localStorage.getItem('token');
       
       if (!token) {
         alert('Vous devez être connecté pour créer une demande');
@@ -98,11 +98,25 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
         return;
       }
 
-      const formData = new FormData();
-      formData.append('date', data.proof);
-      formData.append('metadata', JSON.stringify({amount: data.amount, type: data.type, description: data.description}));
+      // Vérifier que le fichier justificatif est présent
+      if (!data.proof) {
+        alert('Veuillez ajouter un justificatif (image ou PDF)');
+        setIsSubmitting(false);
+        return;
+      }
 
-      const response = await fetch('http://localhost:5000/api/bills', {
+      // Créer le FormData avec les bonnes données
+      const formData = new FormData();
+      formData.append('proof', data.proof);  // Le fichier justificatif
+      formData.append('metadata', JSON.stringify({
+        date: data.date,
+        amount: data.amount,
+        type: data.type,
+        description: data.description,
+        status: data.status
+      }));
+
+      const response = await fetch('https://gsb-2.onrender.com/api/bills', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -111,7 +125,8 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
       });  
       
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
       }
       
       const billData = await response.json();
@@ -149,9 +164,9 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
   return (
     <div className="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Backdrop with blur effect */}
+        {/* Backdrop Corporate */}
         <div 
-          className="fixed inset-0 backdrop-blur-sm bg-black/30 transition-opacity" 
+          className="fixed inset-0 bg-slate-900/40 transition-opacity" 
           aria-hidden="true"
           onClick={onClose}
         ></div>
@@ -159,24 +174,25 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
         {/* Modal positioning */}
         <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
         
-        {/* Modal content */}
+        {/* Modal content Corporate */}
         <div 
           ref={modalRef}
-          className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle z-[101] relative"
+          className="inline-block transform overflow-hidden rounded bg-white text-left align-bottom shadow-sm border border-slate-200 transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle z-[101] relative"
           onClick={(e) => e.stopPropagation()}
         >
           <form onSubmit={handleSubmit}>
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="bg-white px-6 pt-6 pb-5">
               <div className="sm:flex sm:items-start">
-                <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">
-                    {initialData ? 'Edit Bill' : 'Add New Bill'}
+                <div className="mt-0 text-center sm:mt-0 sm:text-left w-full">
+                  <h3 className="text-lg font-semibold leading-6 text-slate-900 mb-1">
+                    {initialData ? 'Modifier la note de frais' : 'Nouvelle note de frais'}
                   </h3>
+                  <p className="text-sm text-slate-500 mb-5">Complétez les informations ci-dessous</p>
                   
-                  <div className="mt-4 space-y-6">
+                  <div className="space-y-5">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="date" className="block text-sm font-medium text-slate-700 mb-1.5">
                           Date
                         </label>
                         <input
@@ -186,13 +202,13 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                           value={data.date}
                           onChange={handleChange}
                           required
-                          className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                          className="block w-full rounded border border-slate-300 py-2 px-3 text-sm text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                         />
                       </div>
                       
                       <div>
-                        <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                          Amount ($)
+                        <label htmlFor="amount" className="block text-sm font-medium text-slate-700 mb-1.5">
+                          Montant (€)
                         </label>
                         <input
                           type="number"
@@ -204,54 +220,54 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                           value={data.amount}
                           onChange={handleChange}
                           required
-                          className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                          className="block w-full rounded border border-slate-300 py-2 px-3 text-sm text-slate-700 tabular-nums focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                         />
                       </div>
                     </div>
                     
                     <div>
-                      <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-                        Type
+                      <label htmlFor="type" className="block text-sm font-medium text-slate-700 mb-1.5">
+                        Type de dépense
                       </label>
                       <input
                         type="text"
                         name="type"
                         id="type"
-                        placeholder="Enter type name"
+                        placeholder="Ex: Déplacement, Repas, Hébergement..."
                         value={data.type}
                         onChange={handleChange}
                         required
-                        className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                        className="block w-full rounded border border-slate-300 py-2 px-3 text-sm text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1.5">
                         Description
                       </label>
                       <textarea
                         id="description"
                         name="description"
                         rows={3}
-                        placeholder="Enter bill description"
+                        placeholder="Détails de la dépense..."
                         value={data.description}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                        className="block w-full rounded border border-slate-300 py-2 px-3 text-sm text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Proof
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                        Justificatif
                       </label>
                       <div 
-                        className="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6"
+                        className="flex justify-center rounded border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-8 hover:border-slate-400 transition-colors"
                         onDragOver={handleDragOver}
                         onDrop={handleDrop}
                       >
-                        <div className="space-y-1 text-center">
+                        <div className="space-y-2 text-center">
                           <svg
-                            className="mx-auto h-12 w-12 text-gray-400"
+                            className="mx-auto h-10 w-10 text-slate-400"
                             stroke="currentColor"
                             fill="none"
                             viewBox="0 0 48 48"
@@ -264,12 +280,12 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                               strokeLinejoin="round"
                             />
                           </svg>
-                          <div className="flex text-sm text-gray-600">
+                          <div className="flex text-sm text-slate-600 justify-center">
                             <label
                               htmlFor="file-upload"
-                              className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500"
+                              className="relative cursor-pointer rounded font-medium text-slate-900 hover:text-slate-700"
                             >
-                              <span>Upload a file</span>
+                              <span>Choisir un fichier</span>
                               <input
                                 id="file-upload"
                                 name="file-upload"
@@ -280,13 +296,13 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                                 accept="image/*,.pdf"
                               />
                             </label>
-                            <p className="pl-1">or drag and drop</p>
+                            <p className="pl-1">ou glisser-déposer</p>
                           </div>
-                          <p className="text-xs text-gray-500">PNG, JPG, PDF up to 10MB</p>
+                          <p className="text-xs text-slate-500">PNG, JPG, PDF jusqu'à 10MB</p>
                           
                           {data.proof && (
-                            <p className="text-sm text-blue-600 mt-2">
-                              {data.proof.name}
+                            <p className="text-sm text-green-700 font-medium mt-2 bg-green-50 border border-green-200 rounded px-3 py-1.5 inline-block">
+                              ✓ {data.proof.name}
                             </p>
                           )}
                         </div>
@@ -297,13 +313,13 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
               </div>
             </div>
             
-            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <div className="bg-slate-50 border-t border-slate-200 px-6 py-3 sm:flex sm:flex-row-reverse">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex w-full justify-center rounded border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 sm:ml-3 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Saving...' : 'Save Bill'}
+                {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
               </button>
               <button
                 type="button"
@@ -312,9 +328,9 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                   e.stopPropagation();
                   onClose();
                 }}
-                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
+                className="mt-3 inline-flex w-full justify-center rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 sm:mt-0 sm:w-auto"
               >
-                Cancel
+                Annuler
               </button>
             </div>
           </form>

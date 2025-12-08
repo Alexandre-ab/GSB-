@@ -11,7 +11,7 @@ async function apiFetch(endpoint, options = {}) {
     };
     
     // Ajouter le token d'authentification s'il existe
-    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    const token = localStorage.getItem('token');
     if (token) {
         defaultHeaders['Authorization'] = `Bearer ${token}`;
     }

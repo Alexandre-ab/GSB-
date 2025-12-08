@@ -12,7 +12,8 @@ export const authService = {
         try {
             const response = await api.post('/api/auth/login', credentials);
             if (response.token) {
-                localStorage.setItem('authToken', response.token);
+                // Uniformisation: toujours utiliser 'token' comme clé
+                localStorage.setItem('token', response.token);
                 localStorage.setItem('user', JSON.stringify(response.user));
             }
             return response;
@@ -26,7 +27,7 @@ export const authService = {
      * Déconnecte l'utilisateur actuel
      */
     logout: () => {
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
     },
 
@@ -35,7 +36,7 @@ export const authService = {
      * @returns {boolean}
      */
     isAuthenticated: () => {
-        return !!localStorage.getItem('authToken');
+        return !!localStorage.getItem('token');
     },
 
     /**

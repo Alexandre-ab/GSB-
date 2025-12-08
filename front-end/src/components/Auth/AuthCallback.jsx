@@ -7,12 +7,11 @@ const AuthCallback = () => {
   useEffect(() => {
     // Récupérer les paramètres de l'URL
     const urlParams = new URLSearchParams(window.location.search);
-    const success = urlParams.get('success');
     const token = urlParams.get('token');
     const error = urlParams.get('error');
 
-    if (success === 'true' && token) {
-      // Stocker le token dans le localStorage
+    if (token) {
+      // Stocker le token dans le localStorage (uniformisé avec 'token')
       localStorage.setItem('token', token);
       
       // Rediriger vers le dashboard

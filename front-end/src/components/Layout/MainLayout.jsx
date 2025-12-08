@@ -21,17 +21,12 @@ const MainLayout = ({ children }) => {
             {/* Header */}
             <header className="app-header">
                 <div className="header-content">
-                    <div className="search-container">
-                        <input type="text" placeholder="Rechercher..." className="search-input" />
+                    <div className="logo-header">
+                        <h1 className="app-title">GSB</h1>
                     </div>
-                    <div className="notifications-profile">
-                        <button className="notification-btn">
-                            <i className="fa-solid fa-bell"></i>
-                        </button>
-                        <div className="profile">
-                            <img src="https://randomuser.me/api/portraits/men/40.jpg" alt="Profile" className="profile-img" />
-                            <span className="profile-name">Alexandre Boué</span>
-                        </div>
+                    <div className="profile">
+                        <img src="https://randomuser.me/api/portraits/men/40.jpg" alt="Profile" className="profile-img" />
+                        <span className="profile-name">Alexandre Boué</span>
                     </div>
                 </div>
             </header>

@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+front-end/node_modules/
+back-end/node_modules/
+
+# Production
+front-end/dist/
+front-end/build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+back-end/.env
+front-end/.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Lock files (optionnel, décommentez si vous voulez ignorer)
+# package-lock.json
+# yarn.lock
+
+# Coverage
+coverage/
+*.lcov
+

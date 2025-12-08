@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './DemandesPage.css';
 import BillModal from '../Modal/BillModal';
-import { billsAPI, testAPI } from '../../services/api';
+import { billsAPI } from '../../api/services/billService';
 
 const DemandesPage = () => {
     // État pour les données
@@ -22,20 +22,20 @@ const DemandesPage = () => {
                     return;
                 }
 
-                // Tester la connexion API
-                await testAPI();
-
                 // Charger les demandes depuis l'API
                 const apiDemandes = await billsAPI.getAll();
                 
                 // Convertir les données API au format attendu par le composant
+                // On garde aussi les données originales pour le modal
                 const demandesFormattees = apiDemandes.map(bill => ({
                     id: bill._id,
                     type: bill.type || 'Note de frais',
                     motif: bill.description || 'Aucune description',
                     statut: bill.status === 'Approved' ? 'Approuvé' : 
                            bill.status === 'Rejected' ? 'Refusé' : 'En attente',
-                    montant: bill.amount ? bill.amount.toString() : '0.00'
+                    montant: bill.amount ? bill.amount.toString() : '0.00',
+                    // Garder les données complètes pour le modal
+                    originalData: bill
                 }));
 
                 setDemandes(demandesFormattees);
@@ -103,17 +103,29 @@ const DemandesPage = () => {
 
     // Handlers pour les actions sur les demandes
     const handleViewDemande = (demande) => {
-        // Convertir les données de demande au format attendu par BillModal
-        const billData = {
-            _id: demande.id,
-            type: demande.type,
-            description: demande.motif,
-            status: demande.statut === 'Approuvé' ? 'Approved' : 
-                   demande.statut === 'Refusé' ? 'Rejected' : 'Pending',
-            amount: parseFloat(demande.montant),
-            date: new Date().toISOString() // Vous pouvez ajouter une vraie date dans vos données
-        };
-        setSelectedBill(billData);
+        console.log('🔍 Ouverture du détail de la demande:', demande);
+        
+        // Utiliser les données originales complètes de l'API
+        if (demande.originalData) {
+            console.log('✅ Utilisation des données originales:', demande.originalData);
+            setSelectedBill(demande.originalData);
+        } else {
+            console.log('⚠️ Utilisation du fallback');
+            // Fallback si originalData n'existe pas
+            const billData = {
+                _id: demande.id,
+                type: demande.type,
+                description: demande.motif,
+                status: demande.statut === 'Approuvé' ? 'Approved' : 
+                       demande.statut === 'Refusé' ? 'Rejected' : 'Pending',
+                amount: parseFloat(demande.montant),
+                date: new Date().toISOString()
+            };
+            console.log('📋 Données du modal:', billData);
+            setSelectedBill(billData);
+        }
+        
+        console.log('🚀 Ouverture du modal...');
         setIsViewBillModalOpen(true);
     };
 
@@ -160,10 +172,11 @@ const DemandesPage = () => {
                                     <div className="actions-container">
                                         <button 
                                             className="action-btn view-btn" 
-                                            title="Voir détails"
+                                            title="Voir les détails complets"
                                             onClick={() => handleViewDemande(demande)}
                                         >
                                             <i className="fa-solid fa-eye"></i>
+                                            <span className="btn-text">Détails</span>
                                         </button>
                                     </div>
                                 </td>

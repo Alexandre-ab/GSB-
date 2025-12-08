@@ -1,29 +1,43 @@
+/* ============================================
+   CORPORATE FINANCE - VARIABLES GLOBALES
+   ============================================ */
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   
-  /* Variables CSS globales */
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --secondary: #f97316;
-  --text-dark: #1e293b;
-  --text-light: #64748b;
-  --bg-main: #f8fafc;
-  --bg-card: #ffffff;
-  --border-color: #e2e8f0;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  /* Palette Corporate Finance - Tons neutres */
+  --primary: #0f172a;           /* Noir ardoise */
+  --primary-hover: #1e293b;
+  --secondary: #475569;          /* Gris ardoise */
+  --text-primary: #0f172a;       /* Noir pour titres */
+  --text-secondary: #475569;     /* Gris anthracite */
+  --text-light: #64748b;         /* Gris clair */
+  
+  /* Fond et conteneurs */
+  --bg-main: #f8fafc;           /* Gris très clair */
+  --bg-card: #ffffff;           /* Blanc pur */
+  --border-color: #e2e8f0;      /* Bordure gris clair */
+  --border-light: #f1f5f9;
+  
+  /* États sémantiques - Tons doux */
+  --success: #166534;           /* Vert foncé */
+  --success-bg: #f0fdf4;        /* Vert pâle */
+  --success-border: #86efac;
+  
+  --warning: #92400e;           /* Orange foncé */
+  --warning-bg: #fffbeb;        /* Orange pâle */
+  --warning-border: #fcd34d;
+  
+  --danger: #991b1b;            /* Rouge foncé */
+  --danger-bg: #fef2f2;         /* Rouge pâle */
+  --danger-border: #fca5a5;
 }
 
 * {
@@ -36,15 +50,20 @@ html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
+  background-color: var(--bg-main);
+  color: var(--text-secondary);
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
 }
+
 a:hover {
-  color: #535bf2;
+  color: var(--primary-hover);
+  text-decoration: underline;
 }
 
 body {
@@ -52,152 +71,212 @@ body {
   display: flex;
   min-width: 320px;
   min-height: 100vh;
-  font-size: 16px;
+  font-size: 14px;
 }
 
-/* Ajustement du conteneur principal pour mobile */
 #root {
   width: 100%;
   max-width: 100%;
 }
 
+/* Typographie Corporate */
 h1 {
-  font-size: 2.5rem;
-  line-height: 1.1;
+  font-size: 2rem;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
 }
 
 h2 {
-  font-size: 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
 }
 
 h3 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 h4 {
-  font-size: 1.2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 p {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
 }
 
+/* Boutons Corporate */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  padding: 0.5em 1em;
+  font-size: 0.875em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--bg-card);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: border-color 0.25s, transform 0.2s;
-}
-button:hover {
-  border-color: #646cff;
-  transform: translateY(-2px);
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.15s ease;
 }
 
-/* Classes responsives utilitaires */
+button:hover {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Classes responsives */
 .container {
   width: 100%;
-  padding: 0 15px;
+  padding: 0 16px;
   margin: 0 auto;
+  max-width: 1600px;
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
-  margin: 0 -15px;
+  margin: 0 -12px;
 }
 
 .col {
-  padding: 0 15px;
+  padding: 0 12px;
   flex: 1;
 }
 
-/* Images responsives */
+/* Images */
 img {
   max-width: 100%;
   height: auto;
 }
 
-/* Media queries de base */
+/* Utilitaires */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Media queries */
 @media (max-width: 1200px) {
   h1 {
-    font-size: 2.2rem;
+    font-size: 1.75rem;
   }
   
   h2 {
-    font-size: 1.8rem;
+    font-size: 1.375rem;
   }
   
   h3 {
-    font-size: 1.3rem;
+    font-size: 1.125rem;
   }
 }
 
 @media (max-width: 768px) {
   body {
-    font-size: 15px;
+    font-size: 13px;
   }
   
   h1 {
-    font-size: 1.8rem;
-  }
-  
-  h2 {
     font-size: 1.5rem;
   }
   
+  h2 {
+    font-size: 1.25rem;
+  }
+  
   h3 {
-    font-size: 1.2rem;
+    font-size: 1.125rem;
   }
   
   button {
-    padding: 0.5em 1em;
+    padding: 0.5em 0.875em;
+  }
+  
+  .container {
+    padding: 0 12px;
   }
 }
 
 @media (max-width: 576px) {
   h1 {
-    font-size: 1.6rem;
+    font-size: 1.375rem;
   }
   
   h2 {
-    font-size: 1.3rem;
+    font-size: 1.125rem;
   }
   
   h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
   
   .container {
-    padding: 0 10px;
+    padding: 0 8px;
   }
   
   .row {
-    margin: 0 -10px;
+    margin: 0 -8px;
   }
   
   .col {
-    padding: 0 10px;
+    padding: 0 8px;
   }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Désactivation des animations tape-à-l'œil */
+*, *::before, *::after {
+  animation-duration: 0s !important;
+  transition-duration: 0.15s !important;
+}
+
+/* Scrollbar Corporate */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
 }

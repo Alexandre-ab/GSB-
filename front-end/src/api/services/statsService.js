@@ -12,7 +12,7 @@ export const statsService = {
         try {
             // Pour l'instant, calculer depuis les bills existantes
             // Plus tard, vous pourrez créer un endpoint dédié
-            const bills = await api.get('/bills');
+            const bills = await api.get('/api/bills');
             
             const stats = {
                 demandesTotal: bills.length,
@@ -38,7 +38,7 @@ export const statsService = {
      */
     getChartData: async () => {
         try {
-            const bills = await api.get('/bills');
+            const bills = await api.get('/api/bills');
             
             // Calculer les données mensuelles (6 derniers mois)
             const monthlyData = [];
@@ -90,17 +90,17 @@ export const statsService = {
      */
     getLatestRequests: async (limit = 5) => {
         try {
-            const bills = await api.get('/bills');
+            const bills = await api.get('/api/bills');
             
             return bills
                 .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
                 .slice(0, limit)
                 .map(bill => ({
-                    id: bill._id,
+                    _id: bill._id?.slice(-8) || 'N/A',
                     date: new Date(bill.date || bill.createdAt).toLocaleDateString('fr-FR'),
                     type: bill.type || 'Note de frais',
-                    montant: (bill.amount || 0).toFixed(2),
-                    statut: bill.status === 'Approved' ? 'Approuvé' : 
+                    amount: (bill.amount || 0).toFixed(2),
+                    status: bill.status === 'Approved' ? 'Approuvé' : 
                            bill.status === 'Rejected' ? 'Refusé' : 'En attente'
                 }));
         } catch (error) {
