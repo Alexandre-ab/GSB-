@@ -2,6 +2,29 @@
 
 Application full-stack de gestion de notes de frais avec authentification JWT et Google OAuth.
 
+---
+
+## 📚 Navigation Documentation
+
+> **🎯 Nouveau !** La documentation complète est organisée pour une navigation facile :
+
+| 🗺️ Navigation | Description |
+|--------------|-------------|
+| **[📚 INDEX DOCUMENTATION](./INDEX_DOCUMENTATION.md)** | **Point d'entrée principal** - Navigation complète par besoin |
+| [🔗 Liens Rapides](./LIENS_RAPIDES.md) | Accès direct aux sections les plus consultées |
+| [🗺️ Structure Documentation](./STRUCTURE_DOCUMENTATION.md) | Vue architecturale et parcours recommandés |
+
+### 📖 Documents principaux
+
+| Document | Pour qui ? | Contenu |
+|----------|------------|---------|
+| [📘 Documentation Technique](./DOCUMENTATION_TECHNIQUE.md) | 👨‍💻 Développeurs | Architecture, API REST, Base de données, Sécurité |
+| [📗 Documentation Fonctionnelle](./DOCUMENTATION_FONCTIONNELLE.md) | 👤 Utilisateurs | Guide complet d'utilisation, FAQ |
+| [🚀 Guide d'Installation](./GUIDE_INSTALLATION.md) | 🔧 Installation | Installation pas à pas, Troubleshooting |
+| [🎓 Compétences BTS SLAM](./COMPETENCES_BTS_SLAM.md) | 🎓 Étudiants/Jury | Référentiel complet avec preuves |
+
+---
+
 ## 🚀 Démarrage rapide
 
 ### Prérequis
@@ -56,13 +79,25 @@ Le serveur démarre sur `http://localhost:5000` 🎉
 
 ## 📚 Documentation complète
 
-Consultez [DOCUMENTATION.md](./DOCUMENTATION.md) pour :
-- Architecture détaillée
-- Toutes les routes API avec exemples
-- Modèles de données
-- Système d'authentification
-- Guide de déploiement
-- Résolution de problèmes
+Ce projet dispose d'une documentation exhaustive répartie en plusieurs fichiers :
+
+### 📖 Documentation principale
+
+- **[📘 Documentation Technique](./DOCUMENTATION_TECHNIQUE.md)** - Architecture, API REST, base de données, sécurité
+- **[📗 Documentation Fonctionnelle](./DOCUMENTATION_FONCTIONNELLE.md)** - Guide utilisateur et administrateur
+- **[🚀 Guide d'Installation](./GUIDE_INSTALLATION.md)** - Installation pas à pas (dev + production)
+- **[🎓 Compétences BTS SLAM](./COMPETENCES_BTS_SLAM.md)** - Mapping du référentiel BTS SIO
+
+### 🎯 Accès rapide
+
+| Besoin | Document |
+|--------|----------|
+| Installer le projet | [Guide d'Installation](./GUIDE_INSTALLATION.md) |
+| Comprendre l'architecture | [Documentation Technique](./DOCUMENTATION_TECHNIQUE.md#architecture-technique) |
+| Utiliser l'application | [Documentation Fonctionnelle](./DOCUMENTATION_FONCTIONNELLE.md) |
+| Préparer le BTS | [Compétences BTS SLAM](./COMPETENCES_BTS_SLAM.md) |
+| Consulter l'API | [Documentation Technique - API REST](./DOCUMENTATION_TECHNIQUE.md#api-rest) |
+| Résoudre un problème | [Guide d'Installation - Troubleshooting](./GUIDE_INSTALLATION.md#résolution-de-problèmes) |
 
 ---
 
@@ -332,10 +367,19 @@ userSchema.pre('save', async function(next) {
 
 ## 📞 Support
 
-- 📖 Lire [DOCUMENTATION.md](./DOCUMENTATION.md)
+### Documentation
+
+- 📘 [Documentation Technique](./DOCUMENTATION_TECHNIQUE.md) - Détails techniques complets
+- 📗 [Documentation Fonctionnelle](./DOCUMENTATION_FONCTIONNELLE.md) - Guide utilisateur
+- 🚀 [Guide d'Installation](./GUIDE_INSTALLATION.md) - Installation et déploiement
+- 🎓 [Compétences BTS SLAM](./COMPETENCES_BTS_SLAM.md) - Référentiel BTS
+
+### Outils de diagnostic
+
 - 🐛 Vérifier les logs du serveur
-- 🧪 Tester avec Postman
+- 🧪 Tester avec Postman ([Collection disponible](./GSB_Postman_Collection.json))
 - ⚙️ Vérifier les variables d'environnement
+- 🔍 Consulter le [Guide de résolution de problèmes](./GUIDE_INSTALLATION.md#résolution-de-problèmes)
 
 ---
 
