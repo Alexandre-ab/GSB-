@@ -1,9 +1,9 @@
 const AWS = require('aws-sdk')
 const {v4: uuidv4} = require('uuid')
 
-const ID = 'AKIAR6CECS537ATOEOBN'
-const Secret = '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'
-const BUCKET_NAME = 'gsbbackend'
+const ID = process.env.AWS_ACCESS_KEY_ID
+const Secret = process.env.AWS_SECRET_ACCESS_KEY
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME
 
 
 
