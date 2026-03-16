@@ -46,6 +46,23 @@ export const authService = {
     getCurrentUser: () => {
         const user = localStorage.getItem('user');
         return user ? JSON.parse(user) : null;
+    },
+
+    /**
+     * Vérifie si l'utilisateur actuel est admin
+     * @returns {boolean}
+     */
+    isAdmin: () => {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+
+        try {
+            // Décoder le JWT pour extraire le rôle
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.role === 'admin';
+        } catch (error) {
+            return false;
+        }
     }
 };
 

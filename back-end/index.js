@@ -39,8 +39,12 @@ const port = process.env.PORT || 5000
  * =====================================
  */
 
-// CORS : Autoriser les requêtes cross-origin
-app.use(cors())
+// CORS : Autoriser les requêtes cross-origin (seulement depuis le frontend)
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5176',
+  credentials: true
+};
+app.use(cors(corsOptions))
 
 // Parser JSON : Permettre de recevoir des données JSON
 app.use(express.json())
@@ -173,9 +177,11 @@ app.get("/auth/google/callback",
       )
       
       // Rediriger vers le frontend avec le token en query param
-      res.redirect(`http://localhost:5176/auth/callback?token=${token}`)
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5176';
+      res.redirect(`${frontendUrl}/auth/callback?token=${token}`)
     } catch (error) {
-      res.redirect("http://localhost:5176/login?error=token_error")
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5176';
+      res.redirect(`${frontendUrl}/login?error=token_error`)
     }
   }
 )

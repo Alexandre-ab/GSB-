@@ -10,6 +10,7 @@ import RemboursementPage from './components/Remboursement/RemboursementPage';
 import ParametresPage from './components/Parametres/ParametresPage';
 import AdminPage from './components/Admin/AdminPage';
 import MainLayout from './components/Layout/MainLayout';
+import { authService } from './api/services/authService';
 import './App.css';
 
 // Fonction pour vérifier si l'utilisateur est authentifié
@@ -21,6 +22,17 @@ const isAuthenticated = () => {
 const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated()) {
     return <Navigate to="/login" />;
+  }
+  return children;
+};
+
+// Composant pour protéger les routes admin
+const AdminRoute = ({ children }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" />;
+  }
+  if (!authService.isAdmin()) {
+    return <Navigate to="/dashboard" />;
   }
   return children;
 };
@@ -85,15 +97,15 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/admin" 
+        <Route
+          path="/admin"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <MainLayout>
                 <AdminPage />
               </MainLayout>
-            </ProtectedRoute>
-          } 
+            </AdminRoute>
+          }
         />
         
         {/* Redirection par défaut */}

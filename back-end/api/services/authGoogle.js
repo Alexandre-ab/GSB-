@@ -18,9 +18,9 @@ const { User, findOrCreateUser } = require('../../models/user_model');
  * 5. L'utilisateur est authentifié dans notre application
  */
 passport.use(new GoogleStrategy({
-    clientID: "QWFvOstFhgUt6nw7SsdYTIn1ArYf6UCs",
-    clientSecret:"-nOL6ili7Ij4umBnp6NxLxabx5Z3p9vUKNwMk31iTwVIRPMaIQ5iS3AWKUhJnga5",
-    callbackURL:"/auth/google/callback"
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || "/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         // Rechercher ou créer l'utilisateur avec le profil Google
