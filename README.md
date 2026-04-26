@@ -1,6 +1,28 @@
-# 🏢 GSB - Gestion de Frais Professionnels
+# 🏢 GSB - Gestion des Notes de Frais
 
-Application full-stack de gestion de notes de frais avec authentification JWT et Google OAuth.
+Application full-stack de gestion de notes de frais des visiteurs médicaux du laboratoire Galaxy Swiss Bourdin (GSB), avec authentification JWT et Google OAuth.
+
+> **Contexte** : refonte de l'ancienne application desktop C# (non accessible hors réseau local) vers une solution Web accessible depuis n'importe quel navigateur. Projet pédagogique — BTS SIO option SLAM, session 2026.
+
+---
+
+## 🌐 Démo en ligne (recommandé pour le jury)
+
+L'application est déployée et testable immédiatement, sans installation :
+
+| Service | URL |
+|---------|-----|
+| **Frontend** | [https://gsb-black.vercel.app](https://gsb-black.vercel.app) |
+| **API Backend** | [https://gsb-2.onrender.com](https://gsb-2.onrender.com) |
+
+> ⚠️ Le backend Render peut prendre 30 à 60 secondes de réveil au premier appel (instance gratuite).
+
+### 🔑 Comptes de test
+
+| Rôle | Email | Mot de passe |
+|------|-------|-------------|
+| **User** (visiteur médical) | alice@example.com | `motdepasse123` |
+| **Admin** (comptable) | admin@gsb.fr | `Admin123!` |
 
 ---
 
@@ -29,7 +51,7 @@ Application full-stack de gestion de notes de frais avec authentification JWT et
 
 ### Prérequis
 - Node.js >= 18.0.0
-- MongoDB Atlas account
+- MongoDB Atlas account (ou MongoDB local)
 - AWS S3 bucket (pour les justificatifs)
 - Google OAuth credentials (optionnel)
 
@@ -37,7 +59,7 @@ Application full-stack de gestion de notes de frais avec authentification JWT et
 
 1. **Cloner le projet**
 ```bash
-git clone <url-du-repo>
+git clone https://github.com/Alexandre-ab/GSB-.git
 cd GSB-
 ```
 
@@ -66,7 +88,7 @@ PORT=5000
 NODE_ENV=development
 ```
 
-4. **Démarrer le serveur**
+4. **Démarrer le backend**
 ```bash
 npm run dev    # Mode développement avec nodemon
 # ou
@@ -74,6 +96,15 @@ npm start      # Mode production
 ```
 
 Le serveur démarre sur `http://localhost:5000` 🎉
+
+5. **Frontend - Installation**
+```bash
+cd front-end
+npm install
+npm run dev
+```
+
+Le frontend démarre sur `http://localhost:5173` 🎉
 
 ---
 
@@ -133,24 +164,24 @@ DELETE /api/users?email=user@example.com
 Header: Authorization: Bearer <token>
 ```
 
-### Factures (protégé par JWT)
+### Notes de frais (protégé par JWT)
 ```bash
-# Créer une facture
+# Créer une note de frais
 POST /api/bills
 Header: Authorization: Bearer <token>
-Body: multipart/form-data (metadata + fichier image)
+Body: multipart/form-data (metadata + fichier justificatif)
 
-# Récupérer les factures
+# Récupérer les notes de frais
 GET /api/bills
 Header: Authorization: Bearer <token>
-→ Admin voit toutes les factures
-→ User voit uniquement ses factures
+→ Admin voit toutes les notes
+→ User voit uniquement ses notes
 
-# Mettre à jour une facture
+# Mettre à jour une note de frais
 PUT /api/bills/:id
 Header: Authorization: Bearer <token>
 
-# Supprimer une facture
+# Supprimer une note de frais
 DELETE /api/bills/:id
 Header: Authorization: Bearer <token>
 ```
@@ -159,20 +190,7 @@ Header: Authorization: Bearer <token>
 
 ## 🧪 Tester avec Postman
 
-### 1. Créer un utilisateur
-```http
-POST http://localhost:5000/api/users
-Content-Type: application/json
-
-{
-  "name": "Alice Martin",
-  "email": "alice@example.com",
-  "password": "motdepasse123",
-  "role": "user"
-}
-```
-
-### 2. Se connecter
+### 1. Se connecter avec un compte de test
 ```http
 POST http://localhost:5000/api/auth/login
 Content-Type: application/json
@@ -190,7 +208,7 @@ Content-Type: application/json
 }
 ```
 
-### 3. Utiliser le token
+### 2. Utiliser le token
 Pour toutes les routes protégées, ajouter le header :
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -205,7 +223,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 {
   name: String,              // Nom complet
   email: String,             // Email unique
-  password: String,          // Hashé avec SHA-256
+  password: String,          // Hashé avec SHA-256 + salt
   role: String,              // "user" ou "admin"
   type_sso: String,          // "local", "google", "microsoft"
   external_id: String,       // Pour OAuth
@@ -213,7 +231,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### Bill (Facture)
+### Bill (Note de frais)
 ```javascript
 {
   date: String,              // Date de la dépense
@@ -222,10 +240,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   description: String,       // Description
   status: String,            // "pending", "approved", "rejected"
   type: String,              // Type de frais
-  user: ObjectId,            // Référence vers User
+  user: ObjectId,            // Référence vers User (userId)
   createdAt: String
 }
 ```
+
+> Le schéma Bill contient un champ `user` (ObjectId, ref: User) permettant de rattacher chaque note de frais à son auteur. Côté API, la route GET /api/bills filtre les notes par userId pour les visiteurs, ou retourne l'ensemble des notes pour l'administrateur.
 
 ---
 
@@ -253,18 +273,32 @@ back-end/
 ├── index.js              # Point d'entrée
 ├── package.json
 └── .env                  # Variables d'environnement
+
+front-end/
+├── src/
+│   ├── components/       # Composants React (dont AdminRoute)
+│   ├── pages/            # Pages de l'application
+│   └── App.jsx           # Router principal
+├── package.json
+└── vite.config.js
 ```
 
 ---
 
 ## 🔐 Sécurité
 
-- ✅ Mots de passe hashés avec **SHA-256 + SALT**
-- ✅ Authentification **JWT** (expire après 24h)
+- ✅ Mots de passe hashés avec **SHA-256 + salt** côté serveur
+- ✅ Authentification **JWT** (token signé, expire après 24h)
+- ✅ **Google OAuth** via Passport.js
 - ✅ Middleware de vérification de token
-- ✅ Rôles utilisateur (user/admin)
+- ✅ **Middleware admin** sur les routes sensibles (POST /api/users)
+- ✅ Composant **AdminRoute** côté React (vérification isAdmin())
+- ✅ **CORS restrictif** (seul le frontend autorisé)
+- ✅ Variables d'environnement pour les credentials (suppression du hardcoding)
 - ✅ Upload sécurisé (taille limitée, types vérifiés)
-- ✅ CORS configuré
+- ✅ Fichier **.env.example** documentant toutes les variables nécessaires
+
+> **Note :** le choix de SHA-256 + salt (vs bcrypt) est un choix technique assumé et documenté. SHA-256 + salt offre une protection de base ; bcrypt serait préférable en production pour sa résistance au brute-force.
 
 ---
 
@@ -303,17 +337,21 @@ npm start
 
 ### Backend
 - **Express.js** - Framework web
-- **MongoDB** + **Mongoose** - Base de données
-- **JWT** - Authentification
+- **MongoDB** + **Mongoose** - Base de données (MongoDB Atlas)
+- **JWT** - Authentification stateless
 - **Passport.js** - Google OAuth
 - **Multer** - Upload de fichiers
 - **AWS SDK** - Stockage S3
-- **SHA-256** - Hashing
+- **SHA-256 + salt** - Hashing des mots de passe
 
 ### Frontend
-- **React** - Interface utilisateur
-- **Vite** - Build tool
+- **React** + **Vite** - Interface utilisateur (SPA)
 - **React Router** - Navigation
+- **Hooks** (useState, useEffect) - Gestion d'état
+
+### Déploiement
+- **Vercel** - Frontend
+- **Render** - Backend API
 
 ---
 
@@ -329,6 +367,10 @@ npm start
 ### Invalid token
 - Token expiré → Se reconnecter
 - Token mal formé → Vérifier le format `Bearer <token>`
+
+### API Render ne répond pas
+- L'instance gratuite se met en veille après inactivité
+- Patienter 30 à 60 secondes au premier appel, puis réessayer
 
 ---
 
@@ -389,5 +431,4 @@ ISC
 
 ---
 
-**✨ Projet GSB - Gestion de Frais Professionnels**
-
+**✨ Projet GSB - Gestion des Notes de Frais — Alexandre Boué — BTS SIO SLAM 2026**
