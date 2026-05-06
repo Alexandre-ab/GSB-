@@ -18,8 +18,8 @@ const LoginPage = () => {
         setIsLoading(true);
         
         try {
-            // Appel au service d'authentification
-            const response = await authService.login({ email, password });
+            // Appel au service d'authentification avec le flag rememberMe
+            const response = await authService.login({ email, password }, rememberMe);
             console.log('Connexion réussie:', response);
             
             // Redirection vers le dashboard après connexion réussie

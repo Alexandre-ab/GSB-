@@ -8,13 +8,14 @@ const DemandesPage = () => {
     const [demandes, setDemandes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isViewBillModalOpen, setIsViewBillModalOpen] = useState(false);
-    const [selectedBill, setSelectedBill] = useState(null);        
+    const [selectedBill, setSelectedBill] = useState(null);
+    const [filters, setFilters] = useState({ statut: '', searchText: '' });        
     // Charger les données depuis l'API
     useEffect(() => {
         const loadDemandes = async () => {
             try {
                 // Vérifier que l'utilisateur est connecté
-                const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+                const token = localStorage.getItem('authToken') || localStorage.getItem('token') || sessionStorage.getItem('token');
                 if (!token) {
                     console.warn('Aucun token d\'authentification trouvé');
                     setDemandes([]);
@@ -129,10 +130,48 @@ const DemandesPage = () => {
         setIsViewBillModalOpen(true);
     };
 
+    const demandesFiltrees = demandes.filter(demande => {
+        const matchStatut = !filters.statut || demande.statut === filters.statut;
+        const searchLower = filters.searchText.toLowerCase();
+        const matchText = !filters.searchText ||
+            demande.type.toLowerCase().includes(searchLower) ||
+            demande.motif.toLowerCase().includes(searchLower);
+        return matchStatut && matchText;
+    });
+
     return (
         <div className="demandes-table">
             <div className="demandes-header">
                 <h2>Mes Demandes</h2>
+                <div className="demandes-filters" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', marginTop: '12px' }}>
+                    <input
+                        type="text"
+                        placeholder="Rechercher (type, motif)..."
+                        value={filters.searchText}
+                        onChange={e => setFilters(f => ({ ...f, searchText: e.target.value }))}
+                        className="filter-search"
+                        style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #ccc', minWidth: '220px' }}
+                    />
+                    <select
+                        value={filters.statut}
+                        onChange={e => setFilters(f => ({ ...f, statut: e.target.value }))}
+                        className="filter-select"
+                        style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #ccc' }}
+                    >
+                        <option value="">Tous les statuts</option>
+                        <option value="En attente">En attente</option>
+                        <option value="Approuvé">Approuvé</option>
+                        <option value="Refusé">Refusé</option>
+                    </select>
+                    {(filters.statut || filters.searchText) && (
+                        <button
+                            onClick={() => setFilters({ statut: '', searchText: '' })}
+                            style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #ccc', cursor: 'pointer' }}
+                        >
+                            Réinitialiser
+                        </button>
+                    )}
+                </div>
             </div>
             {isLoading ? (
                 <div className="loading-container">
@@ -151,7 +190,14 @@ const DemandesPage = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {demandes.map(demande => (
+                        {demandesFiltrees.length === 0 && (
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: 'center', padding: '24px', color: '#888' }}>
+                                    Aucune demande ne correspond aux filtres sélectionnés.
+                                </td>
+                            </tr>
+                        )}
+                        {demandesFiltrees.map(demande => (
                             <tr key={demande.id}>
                                 <td>
                                     <div className="type-with-icon">

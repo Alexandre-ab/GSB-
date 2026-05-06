@@ -29,6 +29,10 @@ const billSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  comment: {
+    type: String,
+    default: null,
+  },
   createdAt: {
     type: String,
     default: Date.now(),

@@ -18,7 +18,8 @@ const AdminPage = () => {
         montantTotal: 0
     });
     const [isLoading, setIsLoading] = useState(true);
-    
+    const [selectedBills, setSelectedBills] = useState(new Set());
+
     // États pour la modale utilisateur
     const [showUserModal, setShowUserModal] = useState(false);
     const [modalMode, setModalMode] = useState('add'); // 'add' ou 'edit'
@@ -70,17 +71,65 @@ const AdminPage = () => {
 
     // Refuser une demande
     const handleReject = async (billId) => {
-        if (!window.confirm('Êtes-vous sûr de vouloir refuser cette demande ?')) {
-            return;
-        }
+        const motif = window.prompt('Motif du rejet (obligatoire) :');
+        if (!motif) return; // Annulé ou vide
         try {
-            await api.put(`/api/bills/${billId}`, { status: 'Rejected' });
+            await api.put(`/api/bills/${billId}`, { status: 'Rejected', comment: motif });
             alert('Demande refusée');
             loadData();
         } catch (error) {
             console.error('Erreur lors du refus:', error);
             alert('Erreur lors du refus de la demande');
         }
+    };
+
+    const handleBulkApprove = async () => {
+        if (selectedBills.size === 0) return;
+        try {
+            await Promise.all(
+                Array.from(selectedBills).map(id =>
+                    api.put(`/api/bills/${id}`, { status: 'Approved' })
+                )
+            );
+            setSelectedBills(new Set());
+            loadData();
+        } catch (error) {
+            console.error('Erreur lors de la validation en masse:', error);
+            alert('Erreur lors de la validation en masse');
+        }
+    };
+
+    const toggleBillSelection = (billId) => {
+        setSelectedBills(prev => {
+            const next = new Set(prev);
+            if (next.has(billId)) {
+                next.delete(billId);
+            } else {
+                next.add(billId);
+            }
+            return next;
+        });
+    };
+
+    const exportCSV = () => {
+        const headers = ['ID', 'Date', 'Type', 'Description', 'Montant', 'Statut', 'Utilisateur'];
+        const rows = demandes.map(d => [
+            d._id,
+            new Date(d.date).toLocaleDateString('fr-FR'),
+            d.type,
+            d.description || '',
+            d.amount?.toFixed(2),
+            d.status,
+            d.user?.name || (typeof d.user === 'string' ? d.user : 'N/A')
+        ]);
+        const csv = [headers, ...rows].map(r => r.join(';')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `gsb-demandes-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
     // Gestion des utilisateurs
@@ -251,28 +300,52 @@ const AdminPage = () => {
                     <div className="demandes-section">
                         <div className="section-header">
                             <h2>Toutes les demandes ({demandes.length})</h2>
-                            <button className="btn-refresh" onClick={loadData}>
-                                <i className="fa-solid fa-refresh"></i>
-                                Actualiser
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                {selectedBills.size > 0 && (
+                                    <button className="btn-add" onClick={handleBulkApprove}>
+                                        <i className="fa-solid fa-check-double"></i>
+                                        Valider la sélection ({selectedBills.size})
+                                    </button>
+                                )}
+                                <button className="btn-refresh" onClick={exportCSV}>
+                                    <i className="fa-solid fa-download"></i>
+                                    Exporter CSV
+                                </button>
+                                <button className="btn-refresh" onClick={loadData}>
+                                    <i className="fa-solid fa-refresh"></i>
+                                    Actualiser
+                                </button>
+                            </div>
                         </div>
                         
                         <div className="table-container">
                             <table className="admin-table">
                                 <thead>
                                     <tr>
+                                        <th></th>
                                         <th>ID</th>
                                         <th>Date</th>
                                         <th>Type</th>
                                         <th>Description</th>
                                         <th>Montant</th>
                                         <th>Statut</th>
+                                        <th>Utilisateur</th>
+                                        <th>Motif</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {demandes.map((demande) => (
                                         <tr key={demande._id}>
+                                            <td>
+                                                {demande.status === 'Pending' && (
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedBills.has(demande._id)}
+                                                        onChange={() => toggleBillSelection(demande._id)}
+                                                    />
+                                                )}
+                                            </td>
                                             <td className="id-cell">{demande._id?.slice(-8)}</td>
                                             <td className="date-cell">
                                                 {new Date(demande.date).toLocaleDateString('fr-FR')}
@@ -285,17 +358,19 @@ const AdminPage = () => {
                                                     {getStatusLabel(demande.status)}
                                                 </span>
                                             </td>
+                                            <td className="name-cell">{demande.user?.name || (typeof demande.user === 'string' ? demande.user?.slice(-8) : 'N/A')}</td>
+                                            <td className="desc-cell">{demande.status === 'Rejected' && demande.comment ? demande.comment : '-'}</td>
                                             <td className="actions-cell">
                                                 {demande.status === 'Pending' && (
                                                     <>
-                                                        <button 
+                                                        <button
                                                             className="action-btn approve-btn"
                                                             onClick={() => handleApprove(demande._id)}
                                                             title="Approuver"
                                                         >
                                                             <i className="fa-solid fa-check"></i>
                                                         </button>
-                                                        <button 
+                                                        <button
                                                             className="action-btn reject-btn"
                                                             onClick={() => handleReject(demande._id)}
                                                             title="Refuser"
@@ -305,9 +380,9 @@ const AdminPage = () => {
                                                     </>
                                                 )}
                                                 {demande.proof && (
-                                                    <a 
-                                                        href={demande.proof} 
-                                                        target="_blank" 
+                                                    <a
+                                                        href={demande.proof}
+                                                        target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="action-btn view-btn"
                                                         title="Voir le justificatif"

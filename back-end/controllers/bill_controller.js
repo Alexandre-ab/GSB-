@@ -1,5 +1,5 @@
 const Bill = require('../models/bill_model')
-const { uploadToS3 } = require('../utils/s3')
+const { uploadToS3, deleteFromS3 } = require('../utils/s3')
 
 const createBill = async (req, res) => {
     try {
@@ -40,7 +40,7 @@ const getBills = async (req, res) => {
         const { id, role } = req.user
         let bills
         if (role === 'admin') {
-            bills = await Bill.find({})
+            bills = await Bill.find({}).populate('user', 'name email')
         } else {
             bills = await Bill.find({ user: id })
         }
@@ -71,10 +71,10 @@ const getBillById = async (req, res) => {
 const updateBill = async (req, res) => {
     try {
         const { id } = req.params
-        const { date, amount, proof, description, status, type } = req.body
+        const { date, amount, proof, description, status, type, comment } = req.body
         const bill = await Bill.findByIdAndUpdate(
             id,
-            { date, amount, proof, description, status, type },
+            { date, amount, proof, description, status, type, comment },
             { new: true }
         )
         if (!bill) {
@@ -94,10 +94,12 @@ const updateBill = async (req, res) => {
 const deleteBill = async (req, res) => {
     try {
         const { id } = req.params
-        const bill = await Bill.findByIdAndDelete(id)
+        const bill = await Bill.findById(id)
         if (!bill) {
             throw new Error('Bill not found', { cause: 404 })
         }
+        if (bill.proof) await deleteFromS3(bill.proof)
+        await Bill.findByIdAndDelete(id)
         res.status(200).json({ message: 'Bill deleted' })
     } catch (error) {
         if (error['cause'] === 404) {

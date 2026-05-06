@@ -2,19 +2,31 @@ import api from '../config';
 /**
  * Service pour gérer l'authentification
  */
+
+const getToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
 export const authService = {
     /**
      * Connecte un utilisateur
      * @param {Object} credentials - Les identifiants (email, password)
+     * @param {boolean} remember - Si true, stocke dans localStorage, sinon sessionStorage
      * @returns {Promise<Object>} - Les données de l'utilisateur et le token
      */
-    login: async (credentials) => {
+    login: async (credentials, remember = false) => {
         try {
             const response = await api.post('/api/auth/login', credentials);
             if (response.token) {
-                // Uniformisation: toujours utiliser 'token' comme clé
-                localStorage.setItem('token', response.token);
-                localStorage.setItem('user', JSON.stringify(response.user));
+                if (remember) {
+                    // Stockage persistant (localStorage)
+                    localStorage.setItem('token', response.token);
+                    localStorage.setItem('user', JSON.stringify(response.user));
+                } else {
+                    // Stockage temporaire (sessionStorage)
+                    sessionStorage.setItem('token', response.token);
+                    sessionStorage.setItem('user', JSON.stringify(response.user));
+                }
             }
             return response;
         } catch (error) {
@@ -29,6 +41,8 @@ export const authService = {
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
     },
 
     /**
@@ -36,15 +50,21 @@ export const authService = {
      * @returns {boolean}
      */
     isAuthenticated: () => {
-        return !!localStorage.getItem('token');
+        return !!getToken();
     },
+
+    /**
+     * Récupère le token
+     * @returns {string|null}
+     */
+    getToken,
 
     /**
      * Récupère l'utilisateur connecté
      * @returns {Object|null}
      */
     getCurrentUser: () => {
-        const user = localStorage.getItem('user');
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
         return user ? JSON.parse(user) : null;
     },
 
@@ -53,7 +73,7 @@ export const authService = {
      * @returns {boolean}
      */
     isAdmin: () => {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) return false;
 
         try {
@@ -66,4 +86,4 @@ export const authService = {
     }
 };
 
-export default authService; 
+export default authService;

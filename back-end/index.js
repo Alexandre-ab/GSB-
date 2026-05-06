@@ -41,7 +41,7 @@ const port = process.env.PORT || 5000
 
 // CORS : Autoriser les requêtes cross-origin (seulement depuis le frontend)
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5176',
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 };
 app.use(cors(corsOptions))

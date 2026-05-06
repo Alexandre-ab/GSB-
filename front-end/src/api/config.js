@@ -1,5 +1,7 @@
 // Configuration API avec Fetch natif
-const API_URL = 'https://gsb-2.onrender.com';
+// En développement : http://localhost:5000
+// En production : variable d'environnement VITE_API_URL (définie sur Vercel)
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Fonction utilitaire pour gérer les requêtes
 async function apiFetch(endpoint, options = {}) {
@@ -10,8 +12,8 @@ async function apiFetch(endpoint, options = {}) {
         'Content-Type': 'application/json',
     };
     
-    // Ajouter le token d'authentification s'il existe
-    const token = localStorage.getItem('token');
+    // Ajouter le token d'authentification s'il existe (localStorage ou sessionStorage)
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
         defaultHeaders['Authorization'] = `Bearer ${token}`;
     }

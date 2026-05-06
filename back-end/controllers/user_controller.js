@@ -217,7 +217,7 @@ const updateUserById = async (req, res) => {
 /**
  * Supprimer un utilisateur par ID
  * Route: DELETE /api/users/:id
- * 
+ *
  * Logique :
  * - Identifier l'utilisateur par ID
  * - Supprimer le document de la base de données
@@ -226,20 +226,63 @@ const deleteUserById = async (req, res) => {
     try {
         const { id } = req.params
         const user = await User.findByIdAndDelete(id)
-        
+
         if (!user) {
             return res.status(404).json({ message: 'User not found' })
         }
-        
+
         res.status(200).json({ message: 'User deleted successfully' })
     } catch (error) {
-        res.status(500).json({ 
+        res.status(500).json({
             message: "Server error",
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         })
     }
 }
 
-// Export des fonctions du contrôleur
-module.exports = { createUser, getUsers, getUserByEmail, updateUser, deleteUser, updateUserById, deleteUserById }
+/**
+ * Mettre à jour le profil de l'utilisateur connecté
+ * Route: PUT /api/users/me
+ */
+const updateCurrentUser = async (req, res) => {
+    try {
+        const { name, email } = req.body
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { name, email },
+            { new: true }
+        ).select('-password')
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+        res.status(200).json(user)
+    } catch (error) {
+        res.status(500).json({ message: "Server error" })
+    }
+}
 
+/**
+ * Changer le mot de passe de l'utilisateur connecté
+ * Route: PUT /api/users/me/password
+ */
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body
+        const user = await User.findById(req.user.id)
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+        const currentHash = sha256(currentPassword + process.env.SALT)
+        if (currentHash !== user.password) {
+            return res.status(400).json({ message: 'Mot de passe actuel incorrect' })
+        }
+        const newHash = sha256(newPassword + process.env.SALT)
+        await User.findByIdAndUpdate(req.user.id, { password: newHash })
+        res.status(200).json({ message: 'Mot de passe mis à jour' })
+    } catch (error) {
+        res.status(500).json({ message: "Server error" })
+    }
+}
+
+// Export des fonctions du contrôleur
+module.exports = { createUser, getUsers, getUserByEmail, updateUser, deleteUser, updateUserById, deleteUserById, updateCurrentUser, changePassword }

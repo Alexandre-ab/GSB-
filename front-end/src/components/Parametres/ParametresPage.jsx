@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './ParametresPage.css';
+import { userService } from '../../api/services/userService';
 
 const ParametresPage = () => {
     // État pour les paramètres d'affichage
@@ -24,6 +25,37 @@ const ParametresPage = () => {
 
     // État pour l'onglet actif
     const [activeTab, setActiveTab] = useState('display');
+
+    const [showPasswordForm, setShowPasswordForm] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordSuccess, setPasswordSuccess] = useState('');
+
+    const handlePasswordFormChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordForm({ ...passwordForm, [name]: value });
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        setPasswordError('');
+        setPasswordSuccess('');
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            setPasswordError('Les nouveaux mots de passe ne correspondent pas.');
+            return;
+        }
+        try {
+            await userService.changePassword({
+                currentPassword: passwordForm.currentPassword,
+                newPassword: passwordForm.newPassword
+            });
+            setPasswordSuccess('Mot de passe mis à jour avec succès.');
+            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            setShowPasswordForm(false);
+        } catch (error) {
+            setPasswordError(error?.response?.data?.message || 'Erreur lors du changement de mot de passe.');
+        }
+    };
 
     // Fonction pour changer les paramètres d'affichage
     const handleDisplayChange = (e) => {
@@ -346,12 +378,50 @@ const ParametresPage = () => {
                                 <div className="setting-item">
                                     <div className="setting-info">
                                         <label>Mot de passe</label>
-                                        <p>Dernière modification: il y a 2 mois</p>
+                                        <p>Modifiez votre mot de passe de connexion</p>
                                     </div>
                                     <div className="setting-control">
-                                        <button className="action-button">
-                                            Modifier
-                                        </button>
+                                        {!showPasswordForm ? (
+                                            <button className="action-button" onClick={() => setShowPasswordForm(true)}>
+                                                Modifier
+                                            </button>
+                                        ) : (
+                                            <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '280px' }}>
+                                                {passwordError && <p style={{ color: 'red', margin: 0, fontSize: '14px' }}>{passwordError}</p>}
+                                                {passwordSuccess && <p style={{ color: 'green', margin: 0, fontSize: '14px' }}>{passwordSuccess}</p>}
+                                                <input
+                                                    type="password"
+                                                    name="currentPassword"
+                                                    placeholder="Ancien mot de passe"
+                                                    value={passwordForm.currentPassword}
+                                                    onChange={handlePasswordFormChange}
+                                                    required
+                                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc' }}
+                                                />
+                                                <input
+                                                    type="password"
+                                                    name="newPassword"
+                                                    placeholder="Nouveau mot de passe"
+                                                    value={passwordForm.newPassword}
+                                                    onChange={handlePasswordFormChange}
+                                                    required
+                                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc' }}
+                                                />
+                                                <input
+                                                    type="password"
+                                                    name="confirmPassword"
+                                                    placeholder="Confirmation"
+                                                    value={passwordForm.confirmPassword}
+                                                    onChange={handlePasswordFormChange}
+                                                    required
+                                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc' }}
+                                                />
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button type="submit" className="action-button primary">Mettre à jour</button>
+                                                    <button type="button" className="action-button secondary" onClick={() => { setShowPasswordForm(false); setPasswordError(''); setPasswordSuccess(''); }}>Annuler</button>
+                                                </div>
+                                            </form>
+                                        )}
                                     </div>
                                 </div>
                                 

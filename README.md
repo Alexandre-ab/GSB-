@@ -12,7 +12,7 @@ L'application est déployée et testable immédiatement, sans installation :
 
 | Service | URL |
 |---------|-----|
-| **Frontend** | [https://gsb-black.vercel.app](https://gsb-black.vercel.app) |
+| **Frontend** | [https://gsb-nuwx.vercel.app](https://gsb-nuwx.vercel.app) |
 | **API Backend** | [https://gsb-2.onrender.com](https://gsb-2.onrender.com) |
 
 > ⚠️ Le backend Render peut prendre 30 à 60 secondes de réveil au premier appel (instance gratuite).
