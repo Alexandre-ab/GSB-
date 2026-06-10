@@ -9,13 +9,13 @@ const DemandesPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isViewBillModalOpen, setIsViewBillModalOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState(null);
-    const [filters, setFilters] = useState({ statut: '', searchText: '' });        
+    const [filters, setFilters] = useState({ statut: '', searchText: '' });
     // Charger les données depuis l'API
     useEffect(() => {
         const loadDemandes = async () => {
             try {
                 // Vérifier que l'utilisateur est connecté
-                const token = localStorage.getItem('authToken') || localStorage.getItem('token') || sessionStorage.getItem('token');
+                const token = localStorage.getItem('authToken') || localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
                 if (!token) {
                     console.warn('Aucun token d\'authentification trouvé');
                     setDemandes([]);
@@ -25,15 +25,15 @@ const DemandesPage = () => {
 
                 // Charger les demandes depuis l'API
                 const apiDemandes = await billsAPI.getAll();
-                
+
                 // Convertir les données API au format attendu par le composant
                 // On garde aussi les données originales pour le modal
                 const demandesFormattees = apiDemandes.map(bill => ({
                     id: bill._id,
                     type: bill.type || 'Note de frais',
                     motif: bill.description || 'Aucune description',
-                    statut: bill.status === 'Approved' ? 'Approuvé' : 
-                           bill.status === 'Rejected' ? 'Refusé' : 'En attente',
+                    statut: bill.status === 'Approved' ? 'Approuvé' :
+                        bill.status === 'Rejected' ? 'Refusé' : 'En attente',
                     montant: bill.amount ? bill.amount.toString() : '0.00',
                     // Garder les données complètes pour le modal
                     originalData: bill
@@ -53,13 +53,13 @@ const DemandesPage = () => {
         const timer = setTimeout(() => {
             loadDemandes();
         }, 500);
-        
+
         return () => clearTimeout(timer);
     }, []);
 
     // Fonction pour générer des icônes de type
     const getTypeIcon = (type) => {
-        switch(type) {
+        switch (type) {
             case 'Note de frais':
                 return 'fa-solid fa-receipt';
             case 'Déplacement':
@@ -81,7 +81,7 @@ const DemandesPage = () => {
 
     // Fonction pour le statut des badges
     const getStatusClass = (statut) => {
-        switch(statut) {
+        switch (statut) {
             case 'Approuvé':
                 return 'statut-badge success';
             case 'Refusé':
@@ -105,7 +105,7 @@ const DemandesPage = () => {
     // Handlers pour les actions sur les demandes
     const handleViewDemande = (demande) => {
         console.log('🔍 Ouverture du détail de la demande:', demande);
-        
+
         // Utiliser les données originales complètes de l'API
         if (demande.originalData) {
             console.log('✅ Utilisation des données originales:', demande.originalData);
@@ -117,15 +117,15 @@ const DemandesPage = () => {
                 _id: demande.id,
                 type: demande.type,
                 description: demande.motif,
-                status: demande.statut === 'Approuvé' ? 'Approved' : 
-                       demande.statut === 'Refusé' ? 'Rejected' : 'Pending',
+                status: demande.statut === 'Approuvé' ? 'Approved' :
+                    demande.statut === 'Refusé' ? 'Rejected' : 'Pending',
                 amount: parseFloat(demande.montant),
                 date: new Date().toISOString()
             };
             console.log('📋 Données du modal:', billData);
             setSelectedBill(billData);
         }
-        
+
         console.log('🚀 Ouverture du modal...');
         setIsViewBillModalOpen(true);
     };
@@ -216,8 +216,8 @@ const DemandesPage = () => {
                                 <td className="montant">{formatMontant(demande.montant)}</td>
                                 <td>
                                     <div className="actions-container">
-                                        <button 
-                                            className="action-btn view-btn" 
+                                        <button
+                                            className="action-btn view-btn"
                                             title="Voir les détails complets"
                                             onClick={() => handleViewDemande(demande)}
                                         >
@@ -231,7 +231,7 @@ const DemandesPage = () => {
                     </tbody>
                 </table>
             )}
-            <BillModal 
+            <BillModal
                 bill={selectedBill}
                 isOpen={isViewBillModalOpen}
                 onClose={handleViewBillModalClose}

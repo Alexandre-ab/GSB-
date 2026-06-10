@@ -6,7 +6,7 @@ const DashboardPage = () => {
     // État pour le chargement des données
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // Données pour les statistiques
     const [stats, setStats] = useState({
         demandesTotal: 0,
@@ -16,22 +16,22 @@ const DashboardPage = () => {
         montantTotal: 0,
         montantRembourse: 0
     });
-    
+
     // Données pour les graphiques
     const [chartData, setChartData] = useState({
         monthly: [],
         types: []
     });
-    
+
     // Données pour les dernières demandes
     const [latestRequests, setLatestRequests] = useState([]);
-    
+
     // Données pour les notifications (garder en local pour l'instant)
     const [notifications, setNotifications] = useState([
         { id: 1, message: "Bienvenue dans votre espace GSB", time: "Maintenant", type: "info" },
         { id: 2, message: "N'oubliez pas de soumettre vos notes de frais", time: "Il y a 2 jours", type: "info" }
     ]);
-    
+
     // Charger les données réelles depuis l'API
     useEffect(() => {
         const loadDashboardData = async () => {
@@ -40,7 +40,7 @@ const DashboardPage = () => {
                 setError(null);
 
                 // Vérifier que l'utilisateur est connecté
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('authToken');
                 if (!token) {
                     setError('Vous devez être connecté pour voir ces données');
                     setIsLoading(false);
@@ -53,11 +53,11 @@ const DashboardPage = () => {
                     statsService.getChartData(),
                     statsService.getLatestRequests(5)
                 ]);
-                
+
                 setStats(statsData);
                 setChartData(chartDataResult);
                 setLatestRequests(latestRequestsData);
-                
+
             } catch (error) {
                 console.error('Erreur lors du chargement des données du dashboard:', error);
                 setError('Erreur lors du chargement des données. Vérifiez votre connexion.');
@@ -65,13 +65,13 @@ const DashboardPage = () => {
                 setIsLoading(false);
             }
         };
-        
+
         loadDashboardData();
     }, []);
-    
+
     // Fonction pour générer la classe de statut
     const getStatusClass = (statut) => {
-        switch(statut) {
+        switch (statut) {
             case 'Approuvé':
                 return 'status-badge success';
             case 'Refusé':
@@ -81,10 +81,10 @@ const DashboardPage = () => {
                 return 'status-badge warning';
         }
     };
-    
+
     // Fonction pour générer la classe de notification
     const getNotificationClass = (type) => {
-        switch(type) {
+        switch (type) {
             case 'success':
                 return 'notification-item success';
             case 'warning':
@@ -94,17 +94,17 @@ const DashboardPage = () => {
                 return 'notification-item info';
         }
     };
-    
+
     // Fonction pour formater les montants en euros
     const formatMontant = (montant) => {
         return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(montant);
     };
-    
+
     // Calcul du pourcentage d'approbation
-    const approvalRate = stats.demandesTotal > 0 
-        ? Math.round((stats.demandesApprouvees / stats.demandesTotal) * 100) 
+    const approvalRate = stats.demandesTotal > 0
+        ? Math.round((stats.demandesApprouvees / stats.demandesTotal) * 100)
         : 0;
-    
+
     return (
         <div className="dashboard-container">
             {isLoading ? (
@@ -127,7 +127,7 @@ const DashboardPage = () => {
                             </select>
                         </div>
                     </div>
-                    
+
                     {/* Statistiques */}
                     <div className="stats-cards">
                         <div className="stat-card total">
@@ -140,7 +140,7 @@ const DashboardPage = () => {
                                 <span className="stat-description">Ce mois-ci</span>
                             </div>
                         </div>
-                        
+
                         <div className="stat-card pending">
                             <div className="stat-icon">
                                 <i className="fa-solid fa-clock"></i>
@@ -151,7 +151,7 @@ const DashboardPage = () => {
                                 <span className="stat-description">À traiter</span>
                             </div>
                         </div>
-                        
+
                         <div className="stat-card approved">
                             <div className="stat-icon">
                                 <i className="fa-solid fa-check-circle"></i>
@@ -162,7 +162,7 @@ const DashboardPage = () => {
                                 <span className="stat-description">{`${approvalRate}% d'approbation`}</span>
                             </div>
                         </div>
-                        
+
                         <div className="stat-card amount">
                             <div className="stat-icon">
                                 <i className="fa-solid fa-euro-sign"></i>
@@ -174,7 +174,7 @@ const DashboardPage = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Graphiques et tableaux */}
                     <div className="charts-tables-container">
                         {/* Graphique des dépenses mensuelles */}
@@ -194,9 +194,9 @@ const DashboardPage = () => {
                                 <div className="bar-chart">
                                     {chartData.monthly.map((item, index) => (
                                         <div className="chart-bar-container" key={index}>
-                                            <div 
-                                                className="chart-bar" 
-                                                style={{ 
+                                            <div
+                                                className="chart-bar"
+                                                style={{
                                                     height: `${(item.amount / 800) * 100}%`,
                                                     backgroundColor: `var(--primary)`
                                                 }}
@@ -213,7 +213,7 @@ const DashboardPage = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* Répartition par type */}
                         <div className="widget donut-widget">
                             <div className="widget-header">
@@ -246,7 +246,7 @@ const DashboardPage = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* Dernières demandes */}
                         <div className="widget latest-requests-widget">
                             <div className="widget-header">
@@ -282,7 +282,7 @@ const DashboardPage = () => {
                                 </table>
                             </div>
                         </div>
-                        
+
                         {/* Notifications */}
                         <div className="widget notifications-widget">
                             <div className="widget-header">

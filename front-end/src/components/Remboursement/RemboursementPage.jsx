@@ -12,22 +12,22 @@ const RemboursementPage = () => {
         description: '',
         categorie: ''
     });
-    
+
     // État pour afficher le formulaire ou non
     const [showForm, setShowForm] = useState(false);
-    
+
     // État pour les remboursements récents
     const [recentRequests, setRecentRequests] = useState([]);
     const [isLoadingRequests, setIsLoadingRequests] = useState(true);
-    
+
     // État pour l'indication de soumission réussie
     const [successSubmit, setSuccessSubmit] = useState(false);
-    
+
     // Charger les demandes depuis l'API au montage du composant
     useEffect(() => {
         const fetchRecentRequests = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('authToken');
                 if (!token) {
                     console.warn('Utilisateur non connecté');
                     setIsLoadingRequests(false);
@@ -35,18 +35,18 @@ const RemboursementPage = () => {
                 }
 
                 const bills = await billService.getAllBills();
-                
+
                 // Convertir les bills en format attendu par le composant
                 const formatted = bills.map(bill => ({
                     id: bill._id,
                     date: new Date(bill.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
                     type: bill.type || 'Autre',
                     montant: bill.amount ? bill.amount.toString() : '0.00',
-                    statut: bill.status === 'Approved' ? 'Approuvé' : 
-                           bill.status === 'Rejected' ? 'Refusé' : 'En attente',
+                    statut: bill.status === 'Approved' ? 'Approuvé' :
+                        bill.status === 'Rejected' ? 'Refusé' : 'En attente',
                     description: bill.description || 'Aucune description'
                 }));
-                
+
                 // Trier par date (les plus récents d'abord) et limiter à 4
                 setRecentRequests(formatted.slice(0, 4));
             } catch (error) {
@@ -58,7 +58,7 @@ const RemboursementPage = () => {
 
         fetchRecentRequests();
     }, []);
-    
+
     // Types de dépenses disponibles
     const expenseTypes = [
         { id: 'transport', label: 'Transport', categories: ['Train', 'Avion', 'Taxi', 'Voiture de location', 'Carburant', 'Péage', 'Autres'] },
@@ -78,7 +78,7 @@ const RemboursementPage = () => {
             [name]: value
         });
     };
-    
+
     // Fonction pour gérer les fichiers
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -89,7 +89,7 @@ const RemboursementPage = () => {
             });
         }
     };
-    
+
     // Fonction pour afficher ou masquer le formulaire
     const toggleForm = () => {
         setShowForm(!showForm);
@@ -106,14 +106,14 @@ const RemboursementPage = () => {
             setSuccessSubmit(false);
         }
     };
-    
+
     // Fonction pour soumettre le formulaire
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         try {
             // Vérifier le token
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             if (!token) {
                 alert('Vous devez être connecté pour créer une demande');
                 return;
@@ -144,7 +144,7 @@ const RemboursementPage = () => {
             }
 
             const createdBill = await response.json();
-            
+
             // Ajouter la nouvelle demande à la liste
             const newRequest = {
                 id: createdBill._id,
@@ -154,12 +154,12 @@ const RemboursementPage = () => {
                 statut: 'En attente',
                 description: formData.description
             };
-            
+
             setRecentRequests([newRequest, ...recentRequests].slice(0, 4));
-            
+
             // Afficher le message de succès
             setSuccessSubmit(true);
-            
+
             // Réinitialiser le formulaire
             setFormData({
                 type: '',
@@ -169,7 +169,7 @@ const RemboursementPage = () => {
                 description: '',
                 categorie: ''
             });
-            
+
             // Masquer le message de succès après 5 secondes
             setTimeout(() => {
                 setSuccessSubmit(false);
@@ -179,10 +179,10 @@ const RemboursementPage = () => {
             alert('Erreur lors de la création de la demande: ' + error.message);
         }
     };
-    
+
     // Fonction pour obtenir la classe de statut
     const getStatusClass = (statut) => {
-        switch(statut) {
+        switch (statut) {
             case 'Approuvé':
                 return 'status-badge success';
             case 'Refusé':
@@ -207,7 +207,7 @@ const RemboursementPage = () => {
                     )}
                 </button>
             </div>
-            
+
             {showForm ? (
                 <div className="form-container">
                     <div className="form-card">
@@ -215,20 +215,20 @@ const RemboursementPage = () => {
                             <h2>Nouvelle demande de remboursement</h2>
                             <p>Veuillez remplir tous les champs obligatoires (*)</p>
                         </div>
-                        
+
                         {successSubmit && (
                             <div className="success-message">
                                 <i className="fa-solid fa-check-circle"></i>
                                 <span>Votre demande de remboursement a été soumise avec succès.</span>
                             </div>
                         )}
-                        
+
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label htmlFor="type">Type de dépense *</label>
-                                <select 
-                                    id="type" 
-                                    name="type" 
+                                <select
+                                    id="type"
+                                    name="type"
                                     value={formData.type}
                                     onChange={handleChange}
                                     required
@@ -241,13 +241,13 @@ const RemboursementPage = () => {
                                     ))}
                                 </select>
                             </div>
-                            
+
                             {formData.type && (
                                 <div className="form-group">
                                     <label htmlFor="categorie">Catégorie *</label>
-                                    <select 
-                                        id="categorie" 
-                                        name="categorie" 
+                                    <select
+                                        id="categorie"
+                                        name="categorie"
                                         value={formData.categorie}
                                         onChange={handleChange}
                                         required
@@ -264,42 +264,42 @@ const RemboursementPage = () => {
                                     </select>
                                 </div>
                             )}
-                            
+
                             <div className="form-row">
                                 <div className="form-group">
                                     <label htmlFor="date">Date de la dépense *</label>
-                                    <input 
-                                        type="date" 
-                                        id="date" 
-                                        name="date" 
+                                    <input
+                                        type="date"
+                                        id="date"
+                                        name="date"
                                         value={formData.date}
                                         onChange={handleChange}
                                         max={new Date().toISOString().split('T')[0]}
                                         required
                                     />
                                 </div>
-                                
+
                                 <div className="form-group">
                                     <label htmlFor="montant">Montant (€) *</label>
-                                    <input 
-                                        type="number" 
-                                        id="montant" 
-                                        name="montant" 
+                                    <input
+                                        type="number"
+                                        id="montant"
+                                        name="montant"
                                         value={formData.montant}
                                         onChange={handleChange}
-                                        min="0.01" 
+                                        min="0.01"
                                         step="0.01"
                                         placeholder="0.00"
                                         required
                                     />
                                 </div>
                             </div>
-                            
+
                             <div className="form-group">
                                 <label htmlFor="description">Description détaillée *</label>
-                                <textarea 
-                                    id="description" 
-                                    name="description" 
+                                <textarea
+                                    id="description"
+                                    name="description"
                                     value={formData.description}
                                     onChange={handleChange}
                                     placeholder="Décrivez le contexte de cette dépense..."
@@ -307,14 +307,14 @@ const RemboursementPage = () => {
                                     required
                                 ></textarea>
                             </div>
-                            
+
                             <div className="form-group">
                                 <label htmlFor="justificatif">Justificatif(s) *</label>
                                 <div className="file-input-container">
-                                    <input 
-                                        type="file" 
-                                        id="justificatif" 
-                                        name="justificatif" 
+                                    <input
+                                        type="file"
+                                        id="justificatif"
+                                        name="justificatif"
                                         onChange={handleFileChange}
                                         accept=".jpg,.jpeg,.png,.pdf"
                                         required
@@ -332,7 +332,7 @@ const RemboursementPage = () => {
                                     <i className="fa-solid fa-circle-info"></i> Formats acceptés : JPG, PNG, PDF - 5MB max.
                                 </p>
                             </div>
-                            
+
                             <div className="form-actions">
                                 <button type="button" className="btn-cancel" onClick={toggleForm}>
                                     Annuler
@@ -343,7 +343,7 @@ const RemboursementPage = () => {
                             </div>
                         </form>
                     </div>
-                    
+
                     <div className="form-sidebar">
                         <div className="info-card">
                             <div className="info-card-header">
@@ -356,7 +356,7 @@ const RemboursementPage = () => {
                                 <p>Pour toute question, contactez le service comptabilité.</p>
                             </div>
                         </div>
-                        
+
                         <div className="info-card">
                             <div className="info-card-header">
                                 <i className="fa-solid fa-lightbulb"></i>
@@ -385,7 +385,7 @@ const RemboursementPage = () => {
                                 <div className="stat-value">3 254,75 €</div>
                                 <div className="stat-footer">Ce mois-ci</div>
                             </div>
-                            
+
                             <div className="stat-item">
                                 <div className="stat-title">
                                     <i className="fa-solid fa-clock"></i>
@@ -394,7 +394,7 @@ const RemboursementPage = () => {
                                 <div className="stat-value">415,20 €</div>
                                 <div className="stat-footer">3 demandes</div>
                             </div>
-                            
+
                             <div className="stat-item">
                                 <div className="stat-title">
                                     <i className="fa-solid fa-check-circle"></i>
@@ -403,7 +403,7 @@ const RemboursementPage = () => {
                                 <div className="stat-value">92%</div>
                                 <div className="stat-footer">24 demandes sur 26</div>
                             </div>
-                            
+
                             <div className="stat-item">
                                 <div className="stat-title">
                                     <i className="fa-solid fa-file-invoice"></i>
@@ -414,13 +414,13 @@ const RemboursementPage = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="recent-requests">
                         <div className="section-header">
                             <h2>Demandes récentes</h2>
                             <a href="/demandes" className="view-all-link">Voir tout <i className="fa-solid fa-arrow-right"></i></a>
                         </div>
-                        
+
                         <div className="requests-table-container">
                             {isLoadingRequests ? (
                                 <div style={{ textAlign: 'center', padding: '2rem' }}>
@@ -431,60 +431,60 @@ const RemboursementPage = () => {
                                     <p>Aucune demande récente</p>
                                 </div>
                             ) : (
-                            <table className="requests-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Date</th>
-                                        <th>Type</th>
-                                        <th>Description</th>
-                                        <th>Montant</th>
-                                        <th>Statut</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {recentRequests.map((request, index) => (
-                                        <tr key={index}>
-                                            <td>
-                                                <span className="request-id">{request.id}</span>
-                                            </td>
-                                            <td>{request.date}</td>
-                                            <td>{request.type}</td>
-                                            <td>
-                                                <div className="description-cell">
-                                                    {request.description}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className="amount">{request.montant} €</span>
-                                            </td>
-                                            <td>
-                                                <span className={getStatusClass(request.statut)}>
-                                                    {request.statut}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div className="actions-cell">
-                                                    <button className="action-btn view" title="Voir les détails">
-                                                        <i className="fa-solid fa-eye"></i>
-                                                    </button>
-                                                    {request.statut === 'En attente' && (
-                                                        <button className="action-btn edit" title="Modifier">
-                                                            <i className="fa-solid fa-pen"></i>
-                                                        </button>
-                                                    )}
-                                                    {request.statut === 'En attente' && (
-                                                        <button className="action-btn delete" title="Supprimer">
-                                                            <i className="fa-solid fa-trash"></i>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
+                                <table className="requests-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Montant</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {recentRequests.map((request, index) => (
+                                            <tr key={index}>
+                                                <td>
+                                                    <span className="request-id">{request.id}</span>
+                                                </td>
+                                                <td>{request.date}</td>
+                                                <td>{request.type}</td>
+                                                <td>
+                                                    <div className="description-cell">
+                                                        {request.description}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span className="amount">{request.montant} €</span>
+                                                </td>
+                                                <td>
+                                                    <span className={getStatusClass(request.statut)}>
+                                                        {request.statut}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div className="actions-cell">
+                                                        <button className="action-btn view" title="Voir les détails">
+                                                            <i className="fa-solid fa-eye"></i>
+                                                        </button>
+                                                        {request.statut === 'En attente' && (
+                                                            <button className="action-btn edit" title="Modifier">
+                                                                <i className="fa-solid fa-pen"></i>
+                                                            </button>
+                                                        )}
+                                                        {request.statut === 'En attente' && (
+                                                            <button className="action-btn delete" title="Supprimer">
+                                                                <i className="fa-solid fa-trash"></i>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             )}
                         </div>
                     </div>

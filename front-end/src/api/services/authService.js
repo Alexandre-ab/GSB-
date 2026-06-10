@@ -4,7 +4,7 @@ import api from '../config';
  */
 
 const getToken = () => {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
+    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
 };
 
 export const authService = {
@@ -20,11 +20,11 @@ export const authService = {
             if (response.token) {
                 if (remember) {
                     // Stockage persistant (localStorage)
-                    localStorage.setItem('token', response.token);
+                    localStorage.setItem('authToken', response.token);
                     localStorage.setItem('user', JSON.stringify(response.user));
                 } else {
                     // Stockage temporaire (sessionStorage)
-                    sessionStorage.setItem('token', response.token);
+                    sessionStorage.setItem('authToken', response.token);
                     sessionStorage.setItem('user', JSON.stringify(response.user));
                 }
             }
@@ -39,9 +39,9 @@ export const authService = {
      * Déconnecte l'utilisateur actuel
      */
     logout: () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
         localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('authToken');
         sessionStorage.removeItem('user');
     },
 

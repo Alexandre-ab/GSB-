@@ -11,38 +11,38 @@ export default function Dashboard({ onLogout }) {
   const [filterStatus, setFilterStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() =>{
-  (async () => {
-    try{
-      // Récupérer le token depuis localStorage au lieu de le hardcoder
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        console.warn('Aucun token trouvé - utilisateur non connecté');
-        return;
-      }
+  useEffect(() => {
+    (async () => {
+      try {
+        // Récupérer le token depuis localStorage au lieu de le hardcoder
+        const token = localStorage.getItem('authToken');
 
-      const response = await fetch('https://gsb-2.onrender.com/api/bills',
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
+        if (!token) {
+          console.warn('Aucun token trouvé - utilisateur non connecté');
+          return;
+        }
+
+        const response = await fetch('https://gsb-2.onrender.com/api/bills',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Fetched bills:', data);
         setBills(data);
-    }catch(e){
-      console.error('Error fetching bills:', e)
-    }
-  })();
-  },  []);
+      } catch (e) {
+        console.error('Error fetching bills:', e)
+      }
+    })();
+  }, []);
 
   // Ensure proper modal cleanup when component unmounts
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function Dashboard({ onLogout }) {
     if (filterStatus !== 'All' && bill.status !== filterStatus) {
       return false;
     }
-    
+
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -95,7 +95,7 @@ export default function Dashboard({ onLogout }) {
         bill.amount.toString().includes(query)
       );
     }
-    
+
     return true;
   });
 
@@ -125,16 +125,16 @@ export default function Dashboard({ onLogout }) {
     setIsAddModalOpen(false);
   };
 
-  console.log('Current state:', { 
-    isDetailModalOpen, 
-    isAddModalOpen, 
-    selectedBill: selectedBill ? `Bill #${selectedBill.id}` : 'None' 
+  console.log('Current state:', {
+    isDetailModalOpen,
+    isAddModalOpen,
+    selectedBill: selectedBill ? `Bill #${selectedBill.id}` : 'None'
   });
 
   return (
     <div className="min-h-screen bg-white">
       <Header onLogout={onLogout} />
-      
+
       <main className="py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
@@ -157,7 +157,7 @@ export default function Dashboard({ onLogout }) {
               </button>
             </div>
           </div>
-          
+
           {/* Filters */}
           <div className="mb-6 grid grid-cols-1 gap-y-4 md:grid-cols-3 md:gap-x-4">
             <div className="relative">
@@ -174,7 +174,7 @@ export default function Dashboard({ onLogout }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <div className="md:col-span-2 md:flex md:items-center md:justify-end">
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-700">Status:</span>
@@ -191,7 +191,7 @@ export default function Dashboard({ onLogout }) {
               </div>
             </div>
           </div>
-          
+
           {/* Bills Table */}
           {filteredBills.length === 0 ? (
             <div className="mt-12 text-center">
@@ -254,35 +254,35 @@ export default function Dashboard({ onLogout }) {
                       </thead>
                       <tbody className="divide-y divide-gray-200 bg-white">
                         {filteredBills.map((bill) => (
-                          <tr 
-                            key={bill._id} 
+                          <tr
+                            key={bill._id}
                             className="hover:bg-gray-50 cursor-pointer"
                           >
-                            <td 
+                            <td
                               className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
                               onClick={() => handleRowClick(bill)}
                             >
                               #{bill._id}
                             </td>
-                            <td 
+                            <td
                               className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                               onClick={() => handleRowClick(bill)}
                             >
                               {formatDate(bill.date)}
                             </td>
-                            <td 
+                            <td
                               className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                               onClick={() => handleRowClick(bill)}
                             >
                               {bill.type}
                             </td>
-                            <td 
+                            <td
                               className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium"
                               onClick={() => handleRowClick(bill)}
                             >
                               ${bill.amount.toFixed(2)}
                             </td>
-                            <td 
+                            <td
                               className="whitespace-nowrap px-3 py-4 text-sm"
                               onClick={() => handleRowClick(bill)}
                             >
@@ -291,7 +291,7 @@ export default function Dashboard({ onLogout }) {
                               </span>
                             </td>
                             <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                              <button 
+                              <button
                                 className="text-blue-600 hover:text-blue-900"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -308,7 +308,7 @@ export default function Dashboard({ onLogout }) {
                   </div>
                 </div>
               </div>
-              
+
               {/* Pagination */}
               <div className="mt-4 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
                 <div className="flex flex-1 justify-between sm:hidden">
@@ -351,14 +351,14 @@ export default function Dashboard({ onLogout }) {
           )}
         </div>
       </main>
-      
+
       {/* Bill Detail Modal */}
       <BillModal
         bill={selectedBill}
         isOpen={isDetailModalOpen}
         onClose={closeDetailModal}
       />
-      
+
       {/* Add Bill Modal */}
       <AddBillModal
         isOpen={isAddModalOpen}

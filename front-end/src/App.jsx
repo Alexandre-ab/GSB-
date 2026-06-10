@@ -15,7 +15,7 @@ import './App.css';
 
 // Fonction pour vérifier si l'utilisateur est authentifié
 const isAuthenticated = () => {
-  return localStorage.getItem('token') !== null || sessionStorage.getItem('token') !== null;
+  return localStorage.getItem('authToken') !== null || sessionStorage.getItem('authToken') !== null;
 };
 
 // Composant pour protéger les routes

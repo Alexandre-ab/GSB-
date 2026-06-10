@@ -69,7 +69,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'file') {
       setData({
         ...data,
@@ -87,11 +87,11 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
     e.preventDefault();
     e.stopPropagation();
     setIsSubmitting(true);
-    
+
     try {
       // Vérifier si un token d'authentification existe
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem('authtoken');
+
       if (!token) {
         alert('Vous devez être connecté pour créer une demande');
         setIsSubmitting(false);
@@ -122,15 +122,15 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
           'Authorization': `Bearer ${token}`,
         },
         body: formData,
-      });  
-      
+      });
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
       }
-      
+
       const billData = await response.json();
-      
+
       onSave(billData);
       onClose();
       alert('Demande ajoutée avec succès !');
@@ -150,7 +150,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setData({
         ...data,
@@ -165,17 +165,17 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
     <div className="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Backdrop Corporate */}
-        <div 
-          className="fixed inset-0 bg-slate-900/40 transition-opacity" 
+        <div
+          className="fixed inset-0 bg-slate-900/40 transition-opacity"
           aria-hidden="true"
           onClick={onClose}
         ></div>
-        
+
         {/* Modal positioning */}
         <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
-        
+
         {/* Modal content Corporate */}
-        <div 
+        <div
           ref={modalRef}
           className="inline-block transform overflow-hidden rounded bg-white text-left align-bottom shadow-sm border border-slate-200 transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle z-[101] relative"
           onClick={(e) => e.stopPropagation()}
@@ -188,7 +188,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                     {initialData ? 'Modifier la note de frais' : 'Nouvelle note de frais'}
                   </h3>
                   <p className="text-sm text-slate-500 mb-5">Complétez les informations ci-dessous</p>
-                  
+
                   <div className="space-y-5">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -205,7 +205,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                           className="block w-full rounded border border-slate-300 py-2 px-3 text-sm text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="amount" className="block text-sm font-medium text-slate-700 mb-1.5">
                           Montant (€)
@@ -224,7 +224,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                         />
                       </div>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="type" className="block text-sm font-medium text-slate-700 mb-1.5">
                         Type de dépense
@@ -240,7 +240,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                         className="block w-full rounded border border-slate-300 py-2 px-3 text-sm text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1.5">
                         Description
@@ -255,12 +255,12 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                         className="block w-full rounded border border-slate-300 py-2 px-3 text-sm text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1.5">
                         Justificatif
                       </label>
-                      <div 
+                      <div
                         className="flex justify-center rounded border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-8 hover:border-slate-400 transition-colors"
                         onDragOver={handleDragOver}
                         onDrop={handleDrop}
@@ -299,7 +299,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                             <p className="pl-1">ou glisser-déposer</p>
                           </div>
                           <p className="text-xs text-slate-500">PNG, JPG, PDF jusqu'à 10MB</p>
-                          
+
                           {data.proof && (
                             <p className="text-sm text-green-700 font-medium mt-2 bg-green-50 border border-green-200 rounded px-3 py-1.5 inline-block">
                               ✓ {data.proof.name}
@@ -312,7 +312,7 @@ export default function AddBillModal({ isOpen, onClose, onSave, initialData = nu
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-slate-50 border-t border-slate-200 px-6 py-3 sm:flex sm:flex-row-reverse">
               <button
                 type="submit"

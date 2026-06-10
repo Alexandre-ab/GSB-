@@ -738,7 +738,7 @@ const handleExport = async () => {
   try {
     const response = await fetch('http://localhost:5000/api/bills/export', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
     });
     
