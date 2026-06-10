@@ -12,7 +12,7 @@ const { User } = require('./models/user_model')
 
 const ACCOUNTS = [
     { email: 'alice@example.com', password: 'motdepasse123' },
-    { email: 'admin@gsb.fr',      password: 'Admin123!'     }
+    { email: 'admin@gsb.fr', password: 'Admin123!' }
 ]
 
 const run = async () => {
@@ -22,7 +22,7 @@ const run = async () => {
         process.exit(1)
     }
 
-    const mongoURI = process.env.MONGO_URI || 'mongodb+srv://admin:admin123@gsb.ycvdfkc.mongodb.net/gsb_db?retryWrites=true&w=majority'
+    const mongoURI = process.env.MONGO_URI
     await mongoose.connect(mongoURI)
     console.log('✅ Connecté à MongoDB\n')
 

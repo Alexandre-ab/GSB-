@@ -36,7 +36,7 @@ const seed = async () => {
         process.exit(1)
     }
 
-    const mongoURI = process.env.MONGO_URI || 'mongodb+srv://admin:admin123@gsb.ycvdfkc.mongodb.net/gsb_db?retryWrites=true&w=majority'
+    const mongoURI = process.env.MONGO_URI
 
     try {
         await mongoose.connect(mongoURI)

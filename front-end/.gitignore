@@ -11,7 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-
+reset-passwords.js
+seed.js
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
