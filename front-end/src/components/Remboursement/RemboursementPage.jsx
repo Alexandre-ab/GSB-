@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import './RemboursementPage.css';
 import { billService } from '../../api/services/billService';
+import { authService } from '../../api/services/authService';
+import BillModal from '../Modal/BillModal';
 
 const RemboursementPage = () => {
     // État pour le formulaire de remboursement
@@ -27,40 +29,52 @@ const RemboursementPage = () => {
     // État pour l'indication de soumission réussie
     const [successSubmit, setSuccessSubmit] = useState(false);
 
+    // États pour la modal de détail, le mode édition et les statistiques
+    const [selectedBill, setSelectedBill] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingBillId, setEditingBillId] = useState(null);
+    const [stats, setStats] = useState({ totalApprouve: 0, enAttente: 0, nbEnAttente: 0, tauxApprobation: 0, derniereDate: null });
+
+    const loadBills = async () => {
+        try {
+            const token = authService.getToken();
+            if (!token) { setIsLoadingRequests(false); return; }
+
+            const bills = await billService.getAllBills();
+
+            // Calcul des statistiques sur l'ensemble des demandes
+            const approved = bills.filter(b => b.status === 'Approved');
+            const pending = bills.filter(b => b.status === 'Pending');
+            const totalApprouve = approved.reduce((sum, b) => sum + (b.amount || 0), 0);
+            const enAttente = pending.reduce((sum, b) => sum + (b.amount || 0), 0);
+            const tauxApprobation = bills.length > 0 ? Math.round((approved.length / bills.length) * 100) : 0;
+            const sortedByDate = [...bills].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const derniereDate = sortedByDate.length > 0 ? new Date(sortedByDate[0].date) : null;
+            setStats({ totalApprouve, enAttente, nbEnAttente: pending.length, tauxApprobation, derniereDate });
+
+            // Formatage pour l'affichage, en conservant le bill original pour la modal
+            const formatted = sortedByDate.map(bill => ({
+                id: bill._id,
+                date: new Date(bill.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+                type: bill.type || 'Autre',
+                montant: bill.amount ? bill.amount.toFixed(2) : '0.00',
+                statut: bill.status === 'Approved' ? 'Approuvé' :
+                    bill.status === 'Rejected' ? 'Refusé' : 'En attente',
+                description: bill.description || 'Aucune description',
+                originalData: bill
+            }));
+
+            setRecentRequests(formatted.slice(0, 4));
+        } catch (error) {
+            console.error('Erreur lors du chargement des demandes:', error);
+        } finally {
+            setIsLoadingRequests(false);
+        }
+    };
+
     // Charger les demandes depuis l'API au montage du composant
     useEffect(() => {
-        const fetchRecentRequests = async () => {
-            try {
-                const token = localStorage.getItem('authToken');
-                if (!token) {
-                    console.warn('Utilisateur non connecté');
-                    setIsLoadingRequests(false);
-                    return;
-                }
-
-                const bills = await billService.getAllBills();
-
-                // Convertir les bills en format attendu par le composant
-                const formatted = bills.map(bill => ({
-                    id: bill._id,
-                    date: new Date(bill.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-                    type: bill.type || 'Autre',
-                    montant: bill.amount ? bill.amount.toString() : '0.00',
-                    statut: bill.status === 'Approved' ? 'Approuvé' :
-                        bill.status === 'Rejected' ? 'Refusé' : 'En attente',
-                    description: bill.description || 'Aucune description'
-                }));
-
-                // Trier par date (les plus récents d'abord) et limiter à 4
-                setRecentRequests(formatted.slice(0, 4));
-            } catch (error) {
-                console.error('Erreur lors du chargement des demandes:', error);
-            } finally {
-                setIsLoadingRequests(false);
-            }
-        };
-
-        fetchRecentRequests();
+        loadBills();
     }, []);
 
     // Types de dépenses disponibles
@@ -97,92 +111,91 @@ const RemboursementPage = () => {
     // Fonction pour afficher ou masquer le formulaire
     const toggleForm = () => {
         setShowForm(!showForm);
-        // Réinitialiser le formulaire
         if (!showForm) {
-            setFormData({
-                type: '',
-                date: '',
-                montant: '',
-                justificatif: null,
-                description: '',
-                categorie: ''
-            });
+            setFormData({ type: '', date: '', montant: '', justificatif: null, description: '', categorie: '' });
             setSuccessSubmit(false);
+        }
+        setEditingBillId(null);
+    };
+
+    // Fonction pour soumettre le formulaire (création ou modification)
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const token = authService.getToken();
+            if (!token) { alert('Vous devez être connecté pour créer une demande'); return; }
+
+            if (editingBillId) {
+                // Mode édition : pas de re-upload de fichier
+                await billService.updateBill(editingBillId, {
+                    type: expenseTypes.find(t => t.id === formData.type)?.label || formData.type,
+                    date: formData.date,
+                    amount: parseFloat(formData.montant),
+                    description: formData.description,
+                });
+                setEditingBillId(null);
+                setShowForm(false);
+            } else {
+                // Mode création : upload avec justificatif obligatoire
+                const apiFormData = new FormData();
+                apiFormData.append('proof', formData.justificatif);
+                apiFormData.append('metadata', JSON.stringify({
+                    date: formData.date,
+                    amount: parseFloat(formData.montant),
+                    type: expenseTypes.find(type => type.id === formData.type)?.label || formData.type,
+                    description: `${formData.description} - Catégorie: ${formData.categorie}`,
+                    status: 'Pending',
+                    seminar: seminarId || null
+                }));
+                const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const response = await fetch(`${BASE_URL}/api/bills`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: apiFormData,
+                });
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            setSuccessSubmit(true);
+            setFormData({ type: '', date: '', montant: '', justificatif: null, description: '', categorie: '' });
+            setTimeout(() => setSuccessSubmit(false), 5000);
+            setIsLoadingRequests(true);
+            loadBills();
+        } catch (error) {
+            console.error('Erreur lors de la soumission:', error);
+            alert('Erreur : ' + error.message);
         }
     };
 
-    // Fonction pour soumettre le formulaire
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleView = (request) => {
+        setSelectedBill(request.originalData);
+        setIsModalOpen(true);
+    };
 
+    const handleDelete = async (id) => {
+        if (!window.confirm('Confirmer la suppression de cette demande ?')) return;
         try {
-            // Vérifier le token
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                alert('Vous devez être connecté pour créer une demande');
-                return;
-            }
-
-            // Créer le FormData
-            const apiFormData = new FormData();
-            apiFormData.append('proof', formData.justificatif);
-            apiFormData.append('metadata', JSON.stringify({
-                date: formData.date,
-                amount: parseFloat(formData.montant),
-                type: expenseTypes.find(type => type.id === formData.type)?.label || formData.type,
-                description: `${formData.description} - Catégorie: ${formData.categorie}`,
-                status: 'Pending',
-                seminar: seminarId || null
-            }));
-
-            // Appeler l'API
-            const response = await fetch('https://gsb-2.onrender.com/api/bills', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: apiFormData,
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-            }
-
-            const createdBill = await response.json();
-
-            // Ajouter la nouvelle demande à la liste
-            const newRequest = {
-                id: createdBill._id,
-                date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-                type: expenseTypes.find(type => type.id === formData.type)?.label || formData.type,
-                montant: parseFloat(formData.montant).toFixed(2),
-                statut: 'En attente',
-                description: formData.description
-            };
-
-            setRecentRequests([newRequest, ...recentRequests].slice(0, 4));
-
-            // Afficher le message de succès
-            setSuccessSubmit(true);
-
-            // Réinitialiser le formulaire
-            setFormData({
-                type: '',
-                date: '',
-                montant: '',
-                justificatif: null,
-                description: '',
-                categorie: ''
-            });
-
-            // Masquer le message de succès après 5 secondes
-            setTimeout(() => {
-                setSuccessSubmit(false);
-            }, 5000);
-        } catch (error) {
-            console.error('Erreur lors de la création de la demande:', error);
-            alert('Erreur lors de la création de la demande: ' + error.message);
+            await billService.deleteBill(id);
+            setIsLoadingRequests(true);
+            loadBills();
+        } catch (err) {
+            alert('Erreur lors de la suppression : ' + err.message);
         }
+    };
+
+    const handleEdit = (request) => {
+        const bill = request.originalData;
+        const typeEntry = expenseTypes.find(t => t.label === bill.type);
+        setFormData({
+            type: typeEntry ? typeEntry.id : 'other',
+            date: bill.date ? bill.date.split('T')[0] : '',
+            montant: bill.amount ? bill.amount.toString() : '',
+            justificatif: null,
+            description: bill.description || '',
+            categorie: ''
+        });
+        setEditingBillId(request.id);
+        setShowForm(true);
     };
 
     // Fonction pour obtenir la classe de statut
@@ -217,7 +230,7 @@ const RemboursementPage = () => {
                 <div className="form-container">
                     <div className="form-card">
                         <div className="form-header">
-                            <h2>Nouvelle demande de remboursement</h2>
+                            <h2>{editingBillId ? 'Modifier la demande' : 'Nouvelle demande de remboursement'}</h2>
                             <p>Veuillez remplir tous les champs obligatoires (*)</p>
                         </div>
 
@@ -329,7 +342,7 @@ const RemboursementPage = () => {
                                         name="justificatif"
                                         onChange={handleFileChange}
                                         accept=".jpg,.jpeg,.png,.pdf"
-                                        required
+                                        required={!editingBillId}
                                     />
                                     <div className="file-input-custom">
                                         <span className="file-name">
@@ -394,8 +407,8 @@ const RemboursementPage = () => {
                                     <i className="fa-solid fa-money-bill-wave"></i>
                                     <span>Total remboursé</span>
                                 </div>
-                                <div className="stat-value">3 254,75 €</div>
-                                <div className="stat-footer">Ce mois-ci</div>
+                                <div className="stat-value">{stats.totalApprouve.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</div>
+                                <div className="stat-footer">Depuis le début</div>
                             </div>
 
                             <div className="stat-item">
@@ -403,8 +416,8 @@ const RemboursementPage = () => {
                                     <i className="fa-solid fa-clock"></i>
                                     <span>En attente</span>
                                 </div>
-                                <div className="stat-value">415,20 €</div>
-                                <div className="stat-footer">3 demandes</div>
+                                <div className="stat-value">{stats.enAttente.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</div>
+                                <div className="stat-footer">{stats.nbEnAttente} demande{stats.nbEnAttente !== 1 ? 's' : ''}</div>
                             </div>
 
                             <div className="stat-item">
@@ -412,8 +425,8 @@ const RemboursementPage = () => {
                                     <i className="fa-solid fa-check-circle"></i>
                                     <span>Taux d'approbation</span>
                                 </div>
-                                <div className="stat-value">92%</div>
-                                <div className="stat-footer">24 demandes sur 26</div>
+                                <div className="stat-value">{stats.tauxApprobation}%</div>
+                                <div className="stat-footer">Taux d'approbation</div>
                             </div>
 
                             <div className="stat-item">
@@ -421,8 +434,10 @@ const RemboursementPage = () => {
                                     <i className="fa-solid fa-file-invoice"></i>
                                     <span>Dernière demande</span>
                                 </div>
-                                <div className="stat-value">Il y a 2 jours</div>
-                                <div className="stat-footer">Le 18 juin 2023</div>
+                                <div className="stat-value">
+                                    {stats.derniereDate ? stats.derniereDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
+                                </div>
+                                <div className="stat-footer">Dernière soumission</div>
                             </div>
                         </div>
                     </div>
@@ -430,7 +445,7 @@ const RemboursementPage = () => {
                     <div className="recent-requests">
                         <div className="section-header">
                             <h2>Demandes récentes</h2>
-                            <a href="/demandes" className="view-all-link">Voir tout <i className="fa-solid fa-arrow-right"></i></a>
+                            <Link to="/demandes" className="view-all-link">Voir tout <i className="fa-solid fa-arrow-right"></i></Link>
                         </div>
 
                         <div className="requests-table-container">
@@ -478,16 +493,16 @@ const RemboursementPage = () => {
                                                 </td>
                                                 <td>
                                                     <div className="actions-cell">
-                                                        <button className="action-btn view" title="Voir les détails">
+                                                        <button className="action-btn view" title="Voir les détails" onClick={() => handleView(request)}>
                                                             <i className="fa-solid fa-eye"></i>
                                                         </button>
                                                         {request.statut === 'En attente' && (
-                                                            <button className="action-btn edit" title="Modifier">
+                                                            <button className="action-btn edit" title="Modifier" onClick={() => handleEdit(request)}>
                                                                 <i className="fa-solid fa-pen"></i>
                                                             </button>
                                                         )}
                                                         {request.statut === 'En attente' && (
-                                                            <button className="action-btn delete" title="Supprimer">
+                                                            <button className="action-btn delete" title="Supprimer" onClick={() => handleDelete(request.id)}>
                                                                 <i className="fa-solid fa-trash"></i>
                                                             </button>
                                                         )}
@@ -501,6 +516,13 @@ const RemboursementPage = () => {
                         </div>
                     </div>
                 </div>
+            )}
+            {isModalOpen && selectedBill && (
+                <BillModal
+                    bill={selectedBill}
+                    isOpen={isModalOpen}
+                    onClose={() => { setIsModalOpen(false); setSelectedBill(null); }}
+                />
             )}
         </div>
     );
