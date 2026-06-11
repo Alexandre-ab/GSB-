@@ -37,6 +37,11 @@ const billSchema = new mongoose.Schema({
     type: String,
     default: Date.now(),
   },
+  seminar: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Seminar',
+    default: null,
+  },
 })
 const Bill = mongoose.model('Bills', billSchema)
 module.exports = Bill

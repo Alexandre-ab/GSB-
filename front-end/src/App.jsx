@@ -9,6 +9,8 @@ import ProfilePage from './components/Profile/ProfilePage';
 import RemboursementPage from './components/Remboursement/RemboursementPage';
 import ParametresPage from './components/Parametres/ParametresPage';
 import AdminPage from './components/Admin/AdminPage';
+import SeminairePage from './components/Seminaires/SeminairePage';
+import SeminaireDetail from './components/Seminaires/SeminaireDetail';
 import MainLayout from './components/Layout/MainLayout';
 import { authService } from './api/services/authService';
 import './App.css';
@@ -115,6 +117,26 @@ const AppContent = () => {
           <ProtectedRoute>
             <MainLayout>
               <DemandesPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/seminaires"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <SeminairePage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/seminaires/:id"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <SeminaireDetail />
             </MainLayout>
           </ProtectedRoute>
         }

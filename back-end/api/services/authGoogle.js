@@ -17,19 +17,23 @@ const { User, findOrCreateUser } = require('../../models/user_model');
  * 4. On recherche ou crée l'utilisateur dans notre base de données
  * 5. L'utilisateur est authentifié dans notre application
  */
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || "/auth/google/callback"
-}, async (accessToken, refreshToken, profile, done) => {
-    try {
-        // Rechercher ou créer l'utilisateur avec le profil Google
-        const user = await findOrCreateUser(profile);
-        return done(null, user);
-    } catch (error) {
-        return done(error, null);
-    }
-}));
+// Ne configure Google OAuth que si les credentials sont définis
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || "/auth/google/callback"
+    }, async (accessToken, refreshToken, profile, done) => {
+        try {
+            const user = await findOrCreateUser(profile);
+            return done(null, user);
+        } catch (error) {
+            return done(error, null);
+        }
+    }));
+} else {
+    console.warn('⚠️ Google OAuth non configuré (GOOGLE_CLIENT_ID manquant dans .env)');
+}
 
 /**
  * Sérialisation de l'utilisateur pour les sessions

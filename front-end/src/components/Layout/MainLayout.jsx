@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './MainLayout.css';
 import { userService } from '../../api/services/userService';
+import { authService } from '../../api/services/authService';
 
 const MainLayout = ({ children }) => {
     const location = useLocation();
@@ -26,7 +27,7 @@ const MainLayout = ({ children }) => {
 
     // Fonction pour gérer la déconnexion
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        authService.logout();
         navigate('/login');
     };
 
@@ -69,6 +70,12 @@ const MainLayout = ({ children }) => {
                                 <Link to="/demandes" className={`nav-link ${currentPath === '/demandes' ? 'active' : ''}`}>
                                     <i className="fa-solid fa-file-invoice"></i>
                                     <span>Demandes</span>
+                                </Link>
+                            </li>
+                            <li className={currentPath.startsWith('/seminaires') ? 'active' : ''}>
+                                <Link to="/seminaires" className={`nav-link ${currentPath.startsWith('/seminaires') ? 'active' : ''}`}>
+                                    <i className="fa-solid fa-calendar-days"></i>
+                                    <span>Séminaires</span>
                                 </Link>
                             </li>
                             <li className={currentPath === '/profil' ? 'active' : ''}>

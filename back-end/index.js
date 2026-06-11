@@ -25,6 +25,7 @@ require('./api/services/authGoogle')
 const userRoute = require('./routes/user_route')
 const authenticationRoute = require('./routes/authentication_route')
 const billRoute = require('./routes/bill_route')
+const seminaireRoute = require('./routes/seminaire_route')
 
 // Charger les variables d'environnement depuis .env
 dotenv.config()
@@ -200,6 +201,7 @@ app.use('/api/auth', authenticationRoute)
 
 // Routes pour la gestion des factures
 app.use('/api/bills', billRoute)
+app.use('/api/seminaires', seminaireRoute)
 
 // Route de test pour vérifier que l'API fonctionne
 app.get('/api/test', (req, res) => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './RemboursementPage.css';
 import { billService } from '../../api/services/billService';
 
@@ -12,6 +13,9 @@ const RemboursementPage = () => {
         description: '',
         categorie: ''
     });
+
+    const [searchParams] = useSearchParams();
+    const seminarId = searchParams.get('seminar');
 
     // État pour afficher le formulaire ou non
     const [showForm, setShowForm] = useState(false);
@@ -127,7 +131,8 @@ const RemboursementPage = () => {
                 amount: parseFloat(formData.montant),
                 type: expenseTypes.find(type => type.id === formData.type)?.label || formData.type,
                 description: `${formData.description} - Catégorie: ${formData.categorie}`,
-                status: 'Pending'
+                status: 'Pending',
+                seminar: seminarId || null
             }));
 
             // Appeler l'API
@@ -215,6 +220,13 @@ const RemboursementPage = () => {
                             <h2>Nouvelle demande de remboursement</h2>
                             <p>Veuillez remplir tous les champs obligatoires (*)</p>
                         </div>
+
+                        {seminarId && (
+                            <div className="success-message" style={{ backgroundColor: 'var(--primary)', color: 'white', border: 'none' }}>
+                                <i className="fa-solid fa-calendar-days"></i>
+                                <span>Note de frais rattachée à un séminaire</span>
+                            </div>
+                        )}
 
                         {successSubmit && (
                             <div className="success-message">
