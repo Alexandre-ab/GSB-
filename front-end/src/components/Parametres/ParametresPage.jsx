@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './ParametresPage.css';
 import { userService } from '../../api/services/userService';
 
@@ -26,36 +27,20 @@ const ParametresPage = () => {
     // État pour l'onglet actif
     const [activeTab, setActiveTab] = useState('display');
 
-    const [showPasswordForm, setShowPasswordForm] = useState(false);
-    const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    const [passwordError, setPasswordError] = useState('');
-    const [passwordSuccess, setPasswordSuccess] = useState('');
+    // Données de l'utilisateur connecté
+    const [currentUser, setCurrentUser] = useState(null);
 
-    const handlePasswordFormChange = (e) => {
-        const { name, value } = e.target;
-        setPasswordForm({ ...passwordForm, [name]: value });
-    };
-
-    const handlePasswordSubmit = async (e) => {
-        e.preventDefault();
-        setPasswordError('');
-        setPasswordSuccess('');
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            setPasswordError('Les nouveaux mots de passe ne correspondent pas.');
-            return;
-        }
-        try {
-            await userService.changePassword({
-                currentPassword: passwordForm.currentPassword,
-                newPassword: passwordForm.newPassword
-            });
-            setPasswordSuccess('Mot de passe mis à jour avec succès.');
-            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-            setShowPasswordForm(false);
-        } catch (error) {
-            setPasswordError(error?.response?.data?.message || 'Erreur lors du changement de mot de passe.');
-        }
-    };
+    useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const user = await userService.getCurrentUser();
+                setCurrentUser(user);
+            } catch (error) {
+                console.error('Erreur chargement utilisateur:', error);
+            }
+        };
+        loadUser();
+    }, []);
 
     // Fonction pour changer les paramètres d'affichage
     const handleDisplayChange = (e) => {
@@ -346,106 +331,34 @@ const ParametresPage = () => {
                     {activeTab === 'account' && (
                         <div className="settings-section">
                             <h2>Paramètres du compte</h2>
-                            <p className="section-description">Gérez les informations de votre compte et la sécurité.</p>
-                            
+                            <p className="section-description">Informations de votre compte. Pour modifier votre profil ou votre mot de passe, rendez-vous sur la page Mon Profil.</p>
+
                             <div className="settings-group">
                                 <div className="account-info">
                                     <div className="account-avatar">
-                                        <img src="https://randomuser.me/api/portraits/men/40.jpg" alt="Avatar" />
-                                        <button className="avatar-edit-btn">
-                                            <i className="fa-solid fa-camera"></i>
-                                        </button>
+                                        <img
+                                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || 'U')}&background=6366f1&color=fff`}
+                                            alt="Avatar"
+                                        />
                                     </div>
                                     <div className="account-details">
-                                        <h3>Alexandre Boué</h3>
-                                        <p>alexandre.boue@gsb.fr</p>
-                                        <p className="account-type">Visiteur médical</p>
+                                        <h3>{currentUser?.name || 'Chargement...'}</h3>
+                                        <p>{currentUser?.email || ''}</p>
+                                        <p className="account-type">
+                                            {currentUser?.role === 'admin' ? 'Administrateur' : 'Visiteur médical'}
+                                        </p>
                                     </div>
                                 </div>
-                                
+
                                 <div className="setting-item">
                                     <div className="setting-info">
-                                        <label>Email</label>
-                                        <p>Modifier votre adresse email</p>
+                                        <label>Profil &amp; sécurité</label>
+                                        <p>Modifier votre nom, email ou mot de passe</p>
                                     </div>
                                     <div className="setting-control">
-                                        <button className="action-button">
-                                            Modifier
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div className="setting-item">
-                                    <div className="setting-info">
-                                        <label>Mot de passe</label>
-                                        <p>Modifiez votre mot de passe de connexion</p>
-                                    </div>
-                                    <div className="setting-control">
-                                        {!showPasswordForm ? (
-                                            <button className="action-button" onClick={() => setShowPasswordForm(true)}>
-                                                Modifier
-                                            </button>
-                                        ) : (
-                                            <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '280px' }}>
-                                                {passwordError && <p style={{ color: 'red', margin: 0, fontSize: '14px' }}>{passwordError}</p>}
-                                                {passwordSuccess && <p style={{ color: 'green', margin: 0, fontSize: '14px' }}>{passwordSuccess}</p>}
-                                                <input
-                                                    type="password"
-                                                    name="currentPassword"
-                                                    placeholder="Ancien mot de passe"
-                                                    value={passwordForm.currentPassword}
-                                                    onChange={handlePasswordFormChange}
-                                                    required
-                                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc' }}
-                                                />
-                                                <input
-                                                    type="password"
-                                                    name="newPassword"
-                                                    placeholder="Nouveau mot de passe"
-                                                    value={passwordForm.newPassword}
-                                                    onChange={handlePasswordFormChange}
-                                                    required
-                                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc' }}
-                                                />
-                                                <input
-                                                    type="password"
-                                                    name="confirmPassword"
-                                                    placeholder="Confirmation"
-                                                    value={passwordForm.confirmPassword}
-                                                    onChange={handlePasswordFormChange}
-                                                    required
-                                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc' }}
-                                                />
-                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <button type="submit" className="action-button primary">Mettre à jour</button>
-                                                    <button type="button" className="action-button secondary" onClick={() => { setShowPasswordForm(false); setPasswordError(''); setPasswordSuccess(''); }}>Annuler</button>
-                                                </div>
-                                            </form>
-                                        )}
-                                    </div>
-                                </div>
-                                
-                                <div className="setting-item">
-                                    <div className="setting-info">
-                                        <label>Authentification à deux facteurs</label>
-                                        <p>Renforce la sécurité de votre compte</p>
-                                    </div>
-                                    <div className="setting-control">
-                                        <button className="action-button">
-                                            Configurer
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div className="setting-item border-top">
-                                    <div className="setting-info danger">
-                                        <label>Désactiver le compte</label>
-                                        <p>Votre compte sera désactivé temporairement</p>
-                                    </div>
-                                    <div className="setting-control">
-                                        <button className="action-button danger">
-                                            Désactiver
-                                        </button>
+                                        <Link to="/profil" className="action-button">
+                                            <i className="fa-solid fa-arrow-right"></i> Accéder à Mon Profil
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
